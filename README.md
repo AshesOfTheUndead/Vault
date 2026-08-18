@@ -12,30 +12,30 @@
 
 ## ✨ Features
 
-- **Single binary** — Go binary with embedded HTML, no runtime dependencies
-- **Origin/Host check** — blocks cross-origin browser requests (the real attack against a localhost app); terminal AIs and curl keep working
-- **Strict security headers** — CSP, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-XSS-Protection`
-- **HTTP server timeouts** — Read/Write 30s, Idle 120s, MaxHeaderBytes 1MB (slowloris-resistant)
-- **Port takeover** — if port 7575 is in use, vault finds the process, kills it, and takes over
-- **Auto-open browser** — launches your default browser 800ms after startup
-- **Command palette** (Ctrl+K / Cmd+K) — fuzzy search across secrets, env vars, and actions; arrow-key navigation
-- **Live connection status indicator** — sys-chip LED turns green/amber/red based on API health
+- **Single binary** - Go binary with embedded HTML, no runtime dependencies
+- **Origin/Host check** - blocks cross-origin browser requests (the real attack against a localhost app); terminal AIs and curl keep working
+- **Strict security headers** - CSP, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-XSS-Protection`
+- **HTTP server timeouts** - Read/Write 30s, Idle 120s, MaxHeaderBytes 1MB (slowloris-resistant)
+- **Port takeover** - if port 7575 is in use, vault finds the process, kills it, and takes over
+- **Auto-open browser** - launches your default browser 800ms after startup
+- **Command palette** (Ctrl+K / Cmd+K) - fuzzy search across secrets, env vars, and actions; arrow-key navigation
+- **Live connection status indicator** - sys-chip LED turns green/amber/red based on API health
 - **Two storage types**:
-  - **Secrets** — personal entries (name + value + details) for passwords, tokens, API keys
-  - **Env Vars** — Render-style environment variables with key/value/secret toggle
-- **Glass morphism UI** — premium dark hacker-terminal aesthetic with matrix rain, scanlines, and CRT vignette
-- **Smooth animations** — letter-by-letter brand reveal, count-up stats, staggered row entrances, smooth tab transitions
-- **Delete confirmation modal** — no accidental deletes
-- **Undo delete** — 5-second undo window via toast action button
-- **Keyboard shortcuts** — full keyboard navigation (`/`, `?`, `1`, `2`, `N`, `E`, `R`, `Ctrl+K`, `Ctrl+Enter`, `Esc`)
-- **`.env` import/export** — bulk import env vars from `.env` files, export back to `.env`
-- **Auto-mark sensitive** — keys like `PASSWORD`, `TOKEN`, `API_KEY` are auto-marked as secret on import
-- **Atomic file writes** — write to temp file then rename, prevents corruption
-- **Request logging** — colorized per-request log (method, path, status, duration)
-- **Graceful shutdown** — Ctrl+C cleanly shuts down the HTTP server
-- **Auto-migration** — upgrades old flat-file format to new folder structure on first run
-- **4-second auto-refresh** — multi-tab sync via polling
-- **Health, stats, and version endpoints** — `/api/health`, `/api/stats`, `/api/version`
+  - **Secrets** - personal entries (name + value + details) for passwords, tokens, API keys
+  - **Env Vars** - Render-style environment variables with key/value/secret toggle
+- **Glass morphism UI** - premium dark hacker-terminal aesthetic with matrix rain, scanlines, and CRT vignette
+- **Smooth animations** - letter-by-letter brand reveal, count-up stats, staggered row entrances, smooth tab transitions
+- **Delete confirmation modal** - no accidental deletes
+- **Undo delete** - 5-second undo window via toast action button
+- **Keyboard shortcuts** - full keyboard navigation (`/`, `?`, `1`, `2`, `N`, `E`, `R`, `Ctrl+K`, `Ctrl+Enter`, `Esc`)
+- **`.env` import/export** - bulk import env vars from `.env` files, export back to `.env`
+- **Auto-mark sensitive** - keys like `PASSWORD`, `TOKEN`, `API_KEY` are auto-marked as secret on import
+- **Atomic file writes** - write to temp file then rename, prevents corruption
+- **Request logging** - colorized per-request log (method, path, status, duration)
+- **Graceful shutdown** - Ctrl+C cleanly shuts down the HTTP server
+- **Auto-migration** - upgrades old flat-file format to new folder structure on first run
+- **4-second auto-refresh** - multi-tab sync via polling
+- **Health, stats, and version endpoints** - `/api/health`, `/api/stats`, `/api/version`
 
 ---
 
@@ -104,7 +104,7 @@ Everything lives under `~/Vault/` (i.e. `C:\Users\<you>\Vault\` on Windows):
         └── ...
 ```
 
-Nothing is encrypted — by design. Delete a folder to delete an entry. Edit files directly if you want.
+Nothing is encrypted - by design. Delete a folder to delete an entry. Edit files directly if you want.
 
 ---
 
@@ -208,8 +208,8 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 
 ### Tech Stack
 
-- **Backend**: [Go 1.21+](https://go.dev) — stdlib `net/http`, `embed`, `os`, `os/exec`
-- **Frontend**: vanilla HTML/CSS/JS — no framework, no build step
+- **Backend**: [Go 1.21+](https://go.dev) - stdlib `net/http`, `embed`, `os`, `os/exec`
+- **Frontend**: vanilla HTML/CSS/JS - no framework, no build step
 - **Fonts**: Space Grotesk (display), JetBrains Mono (body), Share Tech Mono (terminal labels)
 - **Storage**: filesystem, one folder per entry, plaintext files
 
@@ -220,32 +220,32 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 ### Origin/Host check (CSRF protection)
 The server runs a security middleware that blocks **any cross-origin request** coming from a browser. This is the single real attack surface for a localhost app: a malicious webpage making `fetch("http://127.0.0.1:7575/api/delete?name=...")` to delete your vault.
 
-- If the `Origin` header is present, it must be `127.0.0.1`, `localhost`, or `::1` — anything else gets `403 Forbidden`
-- If `Origin` is absent (terminal AIs, curl, scripts), the request is allowed — terminal workflows keep working
+- If the `Origin` header is present, it must be `127.0.0.1`, `localhost`, or `::1` - anything else gets `403 Forbidden`
+- If `Origin` is absent (terminal AIs, curl, scripts), the request is allowed - terminal workflows keep working
 - `Referer` is also checked as a fallback for browsers that omit `Origin`
 
 ```bash
-# terminal (no Origin header) — works
+# terminal (no Origin header) - works
 curl http://127.0.0.1:7575/api/health
 
-# same-origin from the vault UI — works
+# same-origin from the vault UI - works
 curl -H "Origin: http://127.0.0.1:7575" http://127.0.0.1:7575/api/health
 
-# cross-origin from a malicious page — BLOCKED
+# cross-origin from a malicious page - BLOCKED
 curl -H "Origin: https://evil.com" http://127.0.0.1:7575/api/health
 # => 403 Forbidden
 ```
 
 ### Security headers
 Every response includes:
-- `Content-Security-Policy` — strict allowlist (`'self'`, Google Fonts, `data:` URIs)
-- `X-Content-Type-Options: nosniff` — no MIME sniffing
-- `X-Frame-Options: DENY` — no clickjacking
-- `Referrer-Policy: no-referrer` — no referrer leakage
-- `X-XSS-Protection: 1; mode=block` — legacy XSS filter
+- `Content-Security-Policy` - strict allowlist (`'self'`, Google Fonts, `data:` URIs)
+- `X-Content-Type-Options: nosniff` - no MIME sniffing
+- `X-Frame-Options: DENY` - no clickjacking
+- `Referrer-Policy: no-referrer` - no referrer leakage
+- `X-XSS-Protection: 1; mode=block` - legacy XSS filter
 
 ### HTTP server timeouts
-Read/Write 30s, Idle 120s, ReadHeader 10s, MaxHeaderBytes 1MB — prevents slowloris-style resource exhaustion.
+Read/Write 30s, Idle 120s, ReadHeader 10s, MaxHeaderBytes 1MB - prevents slowloris-style resource exhaustion.
 
 ### Why no tokens / encryption?
 The vault exists so your terminal AIs can read it directly. Locking it behind a token would break that workflow for marginal security gain on a localhost-only, single-user app. If you ever want a gate:
@@ -283,7 +283,7 @@ go build -o vault .
 
 ## 📜 License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
 
 ---
 

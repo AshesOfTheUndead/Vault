@@ -441,7 +441,7 @@
     letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--accent); margin-bottom: 8px;
   }
-  .field label::before { content: '▸'; color: var(--accent-lo); }
+  .field label::before { content: 'â–¸'; color: var(--accent-lo); }
   .field input, .field textarea {
     width: 100%; padding: 12px 14px; border-radius: var(--r); outline: 0;
     background: rgba(2, 6, 8, 0.75); border: 1px solid var(--line); color: var(--ink);
@@ -628,7 +628,7 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56ch;
     letter-spacing: 0.04em;
   }
-  .list .sub::before { content: '↳ '; color: var(--ink-mute); }
+  .list .sub::before { content: 'â†³ '; color: var(--ink-mute); }
   .list .det {
     font-family: var(--mono); font-size: 11px; color: var(--ink-3); font-style: italic;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62ch;
@@ -715,7 +715,7 @@
     color: var(--accent); letter-spacing: 0.22em; text-transform: uppercase;
     display: flex; align-items: center; gap: 8px;
   }
-  .about h3::before { content: '▸'; color: var(--accent-lo); }
+  .about h3::before { content: 'â–¸'; color: var(--accent-lo); }
   .about p { margin: 0 0 10px; color: var(--ink-2); font-size: 12.5px; line-height: 1.6; }
   .about p:last-child { margin: 0; }
   .about code {
@@ -852,7 +852,7 @@
     margin: 8px 0 22px; color: var(--ink-mute); font-size: 11.5px;
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
-  .modal .modal-hint::before { content: '⏎'; color: var(--ink-mute); }
+  .modal .modal-hint::before { content: 'âŽ'; color: var(--ink-mute); }
   .modal-actions { display: flex; gap: 10px; }
   .modal-actions .btn { flex: 1; justify-content: center; padding: 12px 18px; }
 
@@ -1042,7 +1042,7 @@
       <span class="dots"><i></i><i></i><i></i></span>
       <span class="path">~<span class="sep">/</span>vault<span class="sep">/</span><span class="leaf" id="panePath">secrets</span></span>
       <span class="spacer"></span>
-      <span class="meta">LOCAL · AUTO SYNC 4S</span>
+      <span class="meta">LOCAL Â· AUTO SYNC 4S</span>
     </div>
     <div class="body">
       <div class="stats">
@@ -1064,7 +1064,7 @@
       </div>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="text" placeholder="grep…" autocomplete="off" spellcheck="false">
+        <input id="q" type="text" placeholder="grepâ€¦" autocomplete="off" spellcheck="false">
         <span class="kbd">/</span>
       </div>
       <button class="btn btn-ghost btn-sm" id="exportEnvBtn" hidden title="Export as .env file">
@@ -1106,7 +1106,7 @@
           <div class="field">
             <label for="fVal">Value</label>
             <div class="input-wrap">
-              <input id="fVal" type="password" placeholder="enter secret value…" autocomplete="off" spellcheck="false" required>
+              <input id="fVal" type="password" placeholder="enter secret valueâ€¦" autocomplete="off" spellcheck="false" required>
               <button type="button" class="reveal" id="fReveal" title="Show / hide value" aria-label="Show or hide value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -1114,9 +1114,9 @@
           </div>
           <div class="field">
             <label for="fDet">Details <span class="opt">optional</span></label>
-            <textarea id="fDet" rows="3" placeholder="# notes, hints, or context for this secret…" autocomplete="off" spellcheck="false"></textarea>
+            <textarea id="fDet" rows="3" placeholder="# notes, hints, or context for this secretâ€¦" autocomplete="off" spellcheck="false"></textarea>
           </div>
-          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save Â· <kbd>Esc</kbd> cancel</div>
           <div class="actions">
             <button type="button" class="btn btn-danger" id="delBtn" hidden>Delete</button>
             <div class="spacer"></div>
@@ -1163,7 +1163,7 @@
               <span class="label">Mark as secret <span class="opt">value masked in lists</span></span>
             </label>
           </div>
-          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save Â· <kbd>Esc</kbd> cancel</div>
           <div class="actions">
             <button type="button" class="btn btn-danger" id="envDelBtn" hidden>Delete</button>
             <div class="spacer"></div>
@@ -1195,8 +1195,8 @@
   </div>
 
   <div class="foot-stats">
-    <span class="live"><span class="dot" aria-hidden="true"></span>vault · <span class="v">running</span></span>
-    <span class="right"><span id="footCount">0 secrets · 0 bytes</span><span class="c"></span></span>
+    <span class="live"><span class="dot" aria-hidden="true"></span>vault Â· <span class="v">running</span></span>
+    <span class="right"><span id="footCount">0 secrets Â· 0 bytes</span><span class="c"></span></span>
   </div>
 
   <section class="about" aria-label="About this page">
@@ -1260,7 +1260,7 @@
   <div class="cmd-modal" role="combobox" aria-expanded="true">
     <div class="cmd-input-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actions…" autocomplete="off" spellcheck="false">
+      <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actionsâ€¦" autocomplete="off" spellcheck="false">
       <span class="cmd-kbd">ESC</span>
     </div>
     <ul class="cmd-results" id="cmdResults" role="listbox"></ul>
@@ -1303,7 +1303,7 @@
   }
   function maskValue(v) {
     if (!v) return '';
-    return '•'.repeat(Math.min(12, Math.max(8, v.length)));
+    return 'â€¢'.repeat(Math.min(12, Math.max(8, v.length)));
   }
 
   function notify(msg, kind, opts) {
@@ -1406,7 +1406,7 @@
   function openEditor(name) {
     editing = name || null;
     editPathLabel.textContent = name ? 'edit' : 'new';
-    editWho.textContent = name ? ('> ' + name) : '> awaiting input…';
+    editWho.textContent = name ? ('> ' + name) : '> awaiting inputâ€¦';
     delBtn.hidden = !name;
     fName.value = name || '';
     const d = name ? data.find(x => x.name === name) : null;
@@ -1429,7 +1429,7 @@
   function openEnvEditor(key) {
     envEditing = key || null;
     envEditPathLabel.textContent = key ? 'edit' : 'new';
-    envEditWho.textContent = key ? ('> ' + key) : '> awaiting input…';
+    envEditWho.textContent = key ? ('> ' + key) : '> awaiting inputâ€¦';
     envDelBtn.hidden = !key;
     fKey.value = key || '';
     const d = key ? envData.find(x => x.key === key) : null;
@@ -1482,7 +1482,7 @@
     if (currentTab === 'secrets') {
       const rows = data.filter(d => d.name.toLowerCase().includes(term));
       setStat(rows.length, rows.length === 1 ? 'secret' : 'secrets');
-      footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' · ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' Â· ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
         list.innerHTML = emptyState('lock', 'Nothing locked away yet.', 'Add your first secret with the <strong>New secret</strong> button above.');
       } else {
@@ -1491,8 +1491,8 @@
             <span class="idx">${String(i + 1).padStart(2, '0')}</span>
             <span class="meta">
               <span class="name">${esc(d.name)}</span>
-              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? '…' : ''}</span>
-              ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? '…' : ''}</span>` : ''}
+              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? 'â€¦' : ''}</span>
+              ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? 'â€¦' : ''}</span>` : ''}
             </span>
             <span class="badge">secret</span>
             <span class="icons">
@@ -1511,7 +1511,7 @@
     } else {
       const rows = envData.filter(d => d.key.toLowerCase().includes(term));
       setStat(rows.length, rows.length === 1 ? 'env var' : 'env vars');
-      footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' · ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' Â· ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
         envList.innerHTML = emptyState('env', 'No environment variables yet.', 'Add your first env var with the <strong>New env var</strong> button above.');
       } else {
@@ -1519,7 +1519,7 @@
           const valDisplay = d.secret
             ? `<span class="env-val masked">${esc(maskValue(d.value))}</span>`
             : (d.value
-                ? `<span class="env-val">${esc(d.value).slice(0, 64)}${d.value.length > 64 ? '…' : ''}</span>`
+                ? `<span class="env-val">${esc(d.value).slice(0, 64)}${d.value.length > 64 ? 'â€¦' : ''}</span>`
                 : `<span class="env-val empty">(empty)</span>`);
           return `
           <li class="env-row" data-key="${esc(d.key)}" style="animation-delay:${i * 50}ms;">
@@ -2012,7 +2012,7 @@
     if (!cv) return;
     const ctx = cv.getContext('2d');
     let w, h, cols, drops, speeds;
-    const CHARS = '01ｱｲｳｴｵｶｷｸｹｺ#@$%&*<>=+/{\\}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const CHARS = '01ï½±ï½²ï½³ï½´ï½µï½¶ï½·ï½¸ï½¹ï½º#@$%&*<>=+/{\\}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const FONT = '14px "Share Tech Mono", monospace';
     const CELL = 18;
     function resize() {

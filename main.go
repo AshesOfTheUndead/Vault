@@ -534,7 +534,7 @@ func listenWithPortTakeover(addr string, port int) (net.Listener, error) {
         if err == nil {
                 return listener, nil
         }
-        // bind failed — try to find and kill the process holding the port
+        // bind failed - try to find and kill the process holding the port
         log.Printf("port %d in use, attempting takeover...", port)
         pids := findPIDsOnPort(port)
         if len(pids) == 0 {
