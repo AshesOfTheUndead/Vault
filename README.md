@@ -78,7 +78,37 @@ build.bat         # windows
 vault.exe -port 8080           # use a different port
 vault.exe -version              # print version
 vault.exe -no-browser           # don't auto-open browser
+vault.exe -host 0.0.0.0         # bind to all interfaces (phone/LAN access)
+vault.exe -lan                  # shorthand for -host 0.0.0.0
 ```
+
+### Access from your phone (Android / Termux)
+
+The vault binds to `127.0.0.1` only by default. To reach it from your phone
+on the same Wi-Fi network, start it in LAN mode:
+
+```bash
+vault.exe -lan
+```
+
+The startup banner prints your LAN URL(s), e.g. `http://192.168.1.5:7575`.
+
+- **Android browser**: open `http://192.168.1.5:7575` - the full UI works on
+  mobile (responsive layout, touch-friendly).
+- **Termux**: plain `curl` works with no extra setup:
+
+```bash
+curl http://192.168.1.5:7575/api/health
+```
+
+- First run may prompt Windows Firewall to allow inbound connections on the
+  port - click Allow.
+- Security in LAN mode is the same as localhost mode: cross-origin browser
+  requests are still blocked (a malicious page on your phone cannot reach the
+  vault), and unknown `Host` headers get `403`. There is no login though, so
+  keep it on a network you trust.
+- The LAN host is verified, not trusted blindly: only your machine's actual
+  interface IPs and hostname are accepted by the Host/Origin allowlist.
 
 ---
 
@@ -220,7 +250,8 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 ### Origin/Host check (CSRF protection)
 The server runs a security middleware that blocks **any cross-origin request** coming from a browser. This is the single real attack surface for a localhost app: a malicious webpage making `fetch("http://127.0.0.1:7575/api/delete?name=...")` to delete your vault.
 
-- If the `Origin` header is present, it must be `127.0.0.1`, `localhost`, or `::1` - anything else gets `403 Forbidden`
+- If the `Origin` header is present, its host must be one of the hosts the server actually serves: loopback (`127.0.0.1`, `localhost`, `::1`) always, plus your machine's real interface IPs and hostname when running with `-lan`/`-host 0.0.0.0`. Anything else gets `403 Forbidden` - matching is case-insensitive and accepts both `host` and `host:port` forms
+- The `Host` header is verified against the same allowlist (DNS-rebinding defense), so a request aimed at your LAN IP is only served if that IP is genuinely local
 - If `Origin` is absent (terminal AIs, curl, scripts), the request is allowed - terminal workflows keep working
 - `Referer` is also checked as a fallback for browsers that omit `Origin`
 
