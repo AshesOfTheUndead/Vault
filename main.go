@@ -30,7 +30,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "2.3.1"
+	version     = "2.3.2"
 )
 
 var (
@@ -39,7 +39,9 @@ var (
 	envVarsDir   string
 	startTime    = time.Now()
 	writeMu      sync.Mutex
+	allowedMu    sync.RWMutex
 	allowedHosts = map[string]bool{}
+	lanHosts     = map[string]bool{}
 )
 
 var sanitizeRe = regexp.MustCompile(`[\\/:*?"<>|]`)
@@ -346,9 +348,12 @@ func uptimeSeconds() int64 {
 // buildAllowedHosts populates the Host/Origin allowlist. Loopback is always
 // allowed; in LAN mode (bind to 0.0.0.0 / a LAN IP) every local interface IP
 // plus the machine hostname is allowed, so phones/Termux can reach the vault.
-// Returns the displayable LAN URLs for the startup banner.
+// LAN IPs are re-scanned every 30s (updateLanHosts) so NIC reconnects and
+// DHCP renewals never lock the phone out. Returns the displayable LAN URLs.
 func buildAllowedHosts(port int, lanMode bool, bindHost string) []string {
 	var lanURLs []string
+	allowedMu.Lock()
+	defer allowedMu.Unlock()
 	add := func(host string) {
 		if host == "" {
 			return
@@ -363,37 +368,73 @@ func buildAllowedHosts(port int, lanMode bool, bindHost string) []string {
 		if hn, err := os.Hostname(); err == nil {
 			add(hn)
 		}
-		ifaces, err := net.Interfaces()
-		if err == nil {
-			for _, ifc := range ifaces {
-				if ifc.Flags&net.FlagUp == 0 || ifc.Flags&net.FlagLoopback != 0 {
-					continue
-				}
-				addrs, err := ifc.Addrs()
-				if err != nil {
-					continue
-				}
-				for _, a := range addrs {
-					var ip net.IP
-					switch v := a.(type) {
-					case *net.IPNet:
-						ip = v.IP
-					case *net.IPAddr:
-						ip = v.IP
-					}
-					if ip == nil {
-						continue
-					}
-					s := ip.String()
-					add(s)
-					if ip.To4() != nil {
-						lanURLs = append(lanURLs, fmt.Sprintf("http://%s:%d", s, port))
-					}
-				}
+		seen := map[string]bool{}
+		for _, s := range scanLanIPs() {
+			add(s)
+			if ip := net.ParseIP(s); ip != nil && ip.To4() != nil && !seen[s] {
+				seen[s] = true
+				lanURLs = append(lanURLs, fmt.Sprintf("http://%s:%d", s, port))
 			}
+			lanHosts[normalizeHost(s)] = true
 		}
 	}
 	return lanURLs
+}
+
+// scanLanIPs returns the machine's current non-loopback interface IPs.
+// Note: on Windows, Go may not set FlagUp on interfaces that are perfectly
+// functional (e.g. Ethernet), so only loopback is filtered out.
+func scanLanIPs() []string {
+	var ips []string
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return ips
+	}
+	for _, ifc := range ifaces {
+		if ifc.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := ifc.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			var ip net.IP
+			switch v := a.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip != nil {
+				ips = append(ips, ip.String())
+			}
+		}
+	}
+	return ips
+}
+
+// updateLanHosts re-scans interfaces and merges the diff into allowedHosts,
+// so IPs that appear or disappear (NIC reconnect, DHCP, VPN) stay in sync.
+func updateLanHosts() {
+	allowedMu.Lock()
+	defer allowedMu.Unlock()
+	cur := map[string]bool{}
+	for _, s := range scanLanIPs() {
+		cur[normalizeHost(s)] = true
+	}
+	for h := range lanHosts {
+		if !cur[h] {
+			delete(lanHosts, h)
+			delete(allowedHosts, h)
+		}
+	}
+	for h := range cur {
+		if !lanHosts[h] {
+			lanHosts[h] = true
+			allowedHosts[h] = true
+		}
+	}
 }
 
 // normalizeHost lowercases and strips IPv6 brackets for allowlist matching.
@@ -411,6 +452,8 @@ func hostAllowed(host string) bool {
 		return true
 	}
 	host = normalizeHost(host)
+	allowedMu.RLock()
+	defer allowedMu.RUnlock()
 	if allowedHosts[host] {
 		return true
 	}
@@ -667,6 +710,15 @@ func main() {
 	}
 	lanMode := bindHost != "127.0.0.1" && bindHost != "::1"
 	lanURLs := buildAllowedHosts(port, lanMode, bindHost)
+	if lanMode {
+		go func() {
+			tick := time.NewTicker(30 * time.Second)
+			defer tick.Stop()
+			for range tick.C {
+				updateLanHosts()
+			}
+		}()
+	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
