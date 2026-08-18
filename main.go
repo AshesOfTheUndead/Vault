@@ -30,7 +30,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "2.3.0"
+	version     = "2.3.1"
 )
 
 var (

@@ -441,7 +441,7 @@
     letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--accent); margin-bottom: 8px;
   }
-  .field label::before { content: 'â–¸'; color: var(--accent-lo); }
+  .field label::before { content: '▸'; color: var(--accent-lo); }
   .field input, .field textarea {
     width: 100%; padding: 12px 14px; border-radius: var(--r); outline: 0;
     background: rgba(2, 6, 8, 0.75); border: 1px solid var(--line); color: var(--ink);
@@ -628,7 +628,7 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56ch;
     letter-spacing: 0.04em;
   }
-  .list .sub::before { content: 'â†³ '; color: var(--ink-mute); }
+  .list .sub::before { content: '↳ '; color: var(--ink-mute); }
   .list .det {
     font-family: var(--mono); font-size: 11px; color: var(--ink-3); font-style: italic;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62ch;
@@ -715,7 +715,7 @@
     color: var(--accent); letter-spacing: 0.22em; text-transform: uppercase;
     display: flex; align-items: center; gap: 8px;
   }
-  .about h3::before { content: 'â–¸'; color: var(--accent-lo); }
+  .about h3::before { content: '▸'; color: var(--accent-lo); }
   .about p { margin: 0 0 10px; color: var(--ink-2); font-size: 12.5px; line-height: 1.6; }
   .about p:last-child { margin: 0; }
   .about code {
@@ -852,7 +852,7 @@
     margin: 8px 0 22px; color: var(--ink-mute); font-size: 11.5px;
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
-  .modal .modal-hint::before { content: 'âŽ'; color: var(--ink-mute); }
+  .modal .modal-hint::before { content: '⏎'; color: var(--ink-mute); }
   .modal-actions { display: flex; gap: 10px; }
   .modal-actions .btn { flex: 1; justify-content: center; padding: 12px 18px; }
 
@@ -995,6 +995,16 @@
     .modal { padding: 24px 20px 20px; }
     .env-row { grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) auto !important; }
   }
+  .icon-btn:active { transform: scale(0.86); }
+  .icon-btn.copied { color: var(--accent); animation: copiedPop 0.45s var(--ease-out); }
+  @keyframes copiedPop { 0% { transform: scale(1); } 35% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  .btn-primary:not(:disabled):active { transform: scale(0.97); }
+  .led-ping { animation: ledPing 0.7s var(--ease-out); }
+  @keyframes ledPing {
+    0% { box-shadow: 0 0 6px var(--ok), 0 0 0 0 rgba(52, 211, 153, 0.55); }
+    100% { box-shadow: 0 0 6px var(--ok), 0 0 0 10px rgba(52, 211, 153, 0); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -1022,7 +1032,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.2</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.3</span>
         </h1>
       </div>
       <p class="tag">
@@ -1042,7 +1052,7 @@
       <span class="dots"><i></i><i></i><i></i></span>
       <span class="path">~<span class="sep">/</span>vault<span class="sep">/</span><span class="leaf" id="panePath">secrets</span></span>
       <span class="spacer"></span>
-      <span class="meta">LOCAL Â· AUTO SYNC 4S</span>
+      <span class="meta">LOCAL · AUTO SYNC 4S</span>
     </div>
     <div class="body">
       <div class="stats">
@@ -1064,7 +1074,7 @@
       </div>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="text" placeholder="grepâ€¦" autocomplete="off" spellcheck="false">
+        <input id="q" type="text" placeholder="grep…" autocomplete="off" spellcheck="false">
         <span class="kbd">/</span>
       </div>
       <button class="btn btn-ghost btn-sm" id="exportEnvBtn" hidden title="Export as .env file">
@@ -1106,7 +1116,7 @@
           <div class="field">
             <label for="fVal">Value</label>
             <div class="input-wrap">
-              <input id="fVal" type="password" placeholder="enter secret valueâ€¦" autocomplete="off" spellcheck="false" required>
+              <input id="fVal" type="password" placeholder="enter secret value…" autocomplete="off" spellcheck="false" required>
               <button type="button" class="reveal" id="fReveal" title="Show / hide value" aria-label="Show or hide value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -1114,9 +1124,9 @@
           </div>
           <div class="field">
             <label for="fDet">Details <span class="opt">optional</span></label>
-            <textarea id="fDet" rows="3" placeholder="# notes, hints, or context for this secretâ€¦" autocomplete="off" spellcheck="false"></textarea>
+            <textarea id="fDet" rows="3" placeholder="# notes, hints, or context for this secret…" autocomplete="off" spellcheck="false"></textarea>
           </div>
-          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save Â· <kbd>Esc</kbd> cancel</div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
           <div class="actions">
             <button type="button" class="btn btn-danger" id="delBtn" hidden>Delete</button>
             <div class="spacer"></div>
@@ -1163,7 +1173,7 @@
               <span class="label">Mark as secret <span class="opt">value masked in lists</span></span>
             </label>
           </div>
-          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save Â· <kbd>Esc</kbd> cancel</div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
           <div class="actions">
             <button type="button" class="btn btn-danger" id="envDelBtn" hidden>Delete</button>
             <div class="spacer"></div>
@@ -1195,8 +1205,8 @@
   </div>
 
   <div class="foot-stats">
-    <span class="live"><span class="dot" aria-hidden="true"></span>vault Â· <span class="v">running</span></span>
-    <span class="right"><span id="footCount">0 secrets Â· 0 bytes</span><span class="c"></span></span>
+    <span class="live"><span class="dot" aria-hidden="true"></span>vault · <span class="v">running</span></span>
+    <span class="right"><span id="footCount">0 secrets · 0 bytes</span><span class="c"></span></span>
   </div>
 
   <section class="about" aria-label="About this page">
@@ -1260,7 +1270,7 @@
   <div class="cmd-modal" role="combobox" aria-expanded="true">
     <div class="cmd-input-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actionsâ€¦" autocomplete="off" spellcheck="false">
+      <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actions…" autocomplete="off" spellcheck="false">
       <span class="cmd-kbd">ESC</span>
     </div>
     <ul class="cmd-results" id="cmdResults" role="listbox"></ul>
@@ -1303,7 +1313,7 @@
   }
   function maskValue(v) {
     if (!v) return '';
-    return 'â€¢'.repeat(Math.min(12, Math.max(8, v.length)));
+    return '•'.repeat(Math.min(12, Math.max(8, v.length)));
   }
 
   function notify(msg, kind, opts) {
@@ -1385,7 +1395,7 @@
     content.style.animation = 'none';
     void content.offsetWidth;
     content.style.animation = '';
-    render();
+    render(true);
   }
   tabs.addEventListener('click', (ev) => {
     const t = ev.target.closest('.tab');
@@ -1406,7 +1416,7 @@
   function openEditor(name) {
     editing = name || null;
     editPathLabel.textContent = name ? 'edit' : 'new';
-    editWho.textContent = name ? ('> ' + name) : '> awaiting inputâ€¦';
+    editWho.textContent = name ? ('> ' + name) : '> awaiting input…';
     delBtn.hidden = !name;
     fName.value = name || '';
     const d = name ? data.find(x => x.name === name) : null;
@@ -1429,7 +1439,7 @@
   function openEnvEditor(key) {
     envEditing = key || null;
     envEditPathLabel.textContent = key ? 'edit' : 'new';
-    envEditWho.textContent = key ? ('> ' + key) : '> awaiting inputâ€¦';
+    envEditWho.textContent = key ? ('> ' + key) : '> awaiting input…';
     envDelBtn.hidden = !key;
     fKey.value = key || '';
     const d = key ? envData.find(x => x.key === key) : null;
@@ -1460,16 +1470,9 @@
   async function refresh() {
     try {
       const [sec, env] = await Promise.all([api('/api/list'), api('/api/env/list')]);
-      data = (sec.entries || []).map(d => ({ ...d, value: '' }));
-      envData = (env.entries || []).slice();
-      const names = data.map(d => d.name);
-      if (names.length) {
-        const vals = await Promise.all(names.map(n => api('/api/get?name=' + encodeURIComponent(n))));
-        vals.forEach((v, i) => { data[i].value = v.value; data[i].details = v.details || ''; });
-      }
-      tabCountSecrets.textContent = data.length;
-      tabCountEnv.textContent = envData.length;
-      render();
+      lastSig = sigOf(sec, env);
+      await loadData(sec, env);
+      render(false);
       setConnState('ok');
     } catch (e) {
       setConnState('err');
@@ -1477,22 +1480,60 @@
     }
   }
 
-  function render() {
+  // silent poll: only re-renders when the vault actually changed, so the
+  // every-4s sync never replays row animations, flickers the list, or
+  // re-fetches every secret value (N+1) on each tick
+  async function sync() {
+    try {
+      const [sec, env] = await Promise.all([api('/api/list'), api('/api/env/list')]);
+      const sig = sigOf(sec, env);
+      if (sig !== lastSig) {
+        lastSig = sig;
+        await loadData(sec, env);
+        render(true);
+      }
+      setConnState('ok');
+    } catch (e) {
+      setConnState('err');
+    }
+  }
+
+  let lastSig = '';
+
+  function sigOf(sec, env) {
+    const a = (sec.entries || []).map(d => d.name + '\u0001' + (d.size || 0)).join('|');
+    const b = (env.entries || []).map(d => d.key + '\u0001' + (d.secret ? 1 : 0) + '\u0001' + (d.value || '')).join('|');
+    return a + '#' + b;
+  }
+
+  async function loadData(sec, env) {
+    const names = (sec.entries || []).map(d => d.name);
+    data = (sec.entries || []).map(d => ({ ...d, value: '' }));
+    envData = (env.entries || []).slice();
+    if (names.length) {
+      const vals = await Promise.all(names.map(n => api('/api/get?name=' + encodeURIComponent(n))));
+      vals.forEach((v, i) => { data[i].value = v.value; data[i].details = v.details || ''; });
+    }
+    tabCountSecrets.textContent = data.length;
+    tabCountEnv.textContent = envData.length;
+  }
+
+  function render(quiet) {
     const term = filter.toLowerCase();
     if (currentTab === 'secrets') {
       const rows = data.filter(d => d.name.toLowerCase().includes(term));
       setStat(rows.length, rows.length === 1 ? 'secret' : 'secrets');
-      footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' Â· ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' · ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
         list.innerHTML = emptyState('lock', 'Nothing locked away yet.', 'Add your first secret with the <strong>New secret</strong> button above.');
       } else {
         list.innerHTML = rows.map((d, i) => `
-          <li data-name="${esc(d.name)}" style="animation-delay:${i * 50}ms;">
+          <li data-name="${esc(d.name)}" ${quiet ? 'style="animation:none"' : `style="animation-delay:${i * 50}ms"`}>
             <span class="idx">${String(i + 1).padStart(2, '0')}</span>
             <span class="meta">
               <span class="name">${esc(d.name)}</span>
-              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? 'â€¦' : ''}</span>
-              ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? 'â€¦' : ''}</span>` : ''}
+              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? '…' : ''}</span>
+              ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? '…' : ''}</span>` : ''}
             </span>
             <span class="badge">secret</span>
             <span class="icons">
@@ -1511,7 +1552,7 @@
     } else {
       const rows = envData.filter(d => d.key.toLowerCase().includes(term));
       setStat(rows.length, rows.length === 1 ? 'env var' : 'env vars');
-      footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' Â· ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' · ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
         envList.innerHTML = emptyState('env', 'No environment variables yet.', 'Add your first env var with the <strong>New env var</strong> button above.');
       } else {
@@ -1519,10 +1560,10 @@
           const valDisplay = d.secret
             ? `<span class="env-val masked">${esc(maskValue(d.value))}</span>`
             : (d.value
-                ? `<span class="env-val">${esc(d.value).slice(0, 64)}${d.value.length > 64 ? 'â€¦' : ''}</span>`
+                ? `<span class="env-val">${esc(d.value).slice(0, 64)}${d.value.length > 64 ? '…' : ''}</span>`
                 : `<span class="env-val empty">(empty)</span>`);
           return `
-          <li class="env-row" data-key="${esc(d.key)}" style="animation-delay:${i * 50}ms;">
+          <li class="env-row" data-key="${esc(d.key)}" ${quiet ? 'style="animation:none"' : `style="animation-delay:${i * 50}ms"`}>
             <span class="idx">${String(i + 1).padStart(2, '0')}</span>
             <span class="env-key">${esc(d.key)}</span>
             <span class="env-val-wrap">
@@ -1561,7 +1602,7 @@
     </li>`;
   }
 
-  async function copyVal(name, isEnv) {
+  async function copyVal(name, isEnv, btn) {
     let value;
     if (isEnv) {
       const d = envData.find(x => x.key === name);
@@ -1584,6 +1625,15 @@
       catch { notify('Copy failed. Reveal the value manually.', 'err'); }
       ta.remove();
     }
+    copyFlash(btn);
+  }
+
+  function copyFlash(btn) {
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 900);
   }
 
   let envRevealTimers = new Map();
@@ -1621,7 +1671,7 @@
     if (!li) return;
     const name = li.dataset.name, act = btn.dataset.act;
     if (act === 'edit') { openEditor(name); return; }
-    if (act === 'copy') { copyVal(name, false); return; }
+    if (act === 'copy') { copyVal(name, false, btn); return; }
     if (act === 'del') { showConfirm(name, 'secret'); return; }
   });
   envList.addEventListener('click', (ev) => {
@@ -1631,7 +1681,7 @@
     if (!li) return;
     const key = li.dataset.key, act = btn.dataset.act;
     if (act === 'edit') { openEnvEditor(key); return; }
-    if (act === 'copy') { copyVal(key, true); return; }
+    if (act === 'copy') { copyVal(key, true, btn); return; }
     if (act === 'reveal') { toggleEnvReveal(key, btn); return; }
     if (act === 'del') { showConfirm(key, 'env'); return; }
   });
@@ -1794,7 +1844,7 @@
     envFileInput.value = '';
   });
 
-  q.addEventListener('input', () => { filter = q.value.trim(); render(); });
+  q.addEventListener('input', () => { filter = q.value.trim(); render(true); });
   document.addEventListener('keydown', (ev) => {
     // ? opens help (when not in input)
     if (ev.key === '?' && !isInInput()) {
@@ -1843,15 +1893,22 @@
   }
 
   /* ---------- live connection status indicator ---------- */
+  let lastConn = '';
   function setConnState(state) {
     // state: 'ok' | 'warn' | 'err'
     if (sysLed) {
+      if (state === 'ok' && lastConn && lastConn !== 'ok') {
+        sysLed.classList.remove('led-ping');
+        void sysLed.offsetWidth;
+        sysLed.classList.add('led-ping');
+      }
       sysLed.dataset.state = state;
     }
     if (sysOnline) {
       sysOnline.dataset.state = state;
       sysOnline.textContent = state === 'ok' ? 'ONLINE' : state === 'warn' ? 'RETRY' : 'OFFLINE';
     }
+    lastConn = state;
   }
 
   /* ---------- command palette ---------- */
@@ -1988,9 +2045,9 @@
   });
 
 
-  (function loop() {
-    refresh().finally(() => setTimeout(loop, 4000));
-  })();
+  refresh().finally(function loop() {
+    sync().finally(() => setTimeout(loop, 4000));
+  });
 
   setTimeout(positionTabIndicator, 100);
   window.addEventListener('resize', positionTabIndicator);
@@ -2012,7 +2069,7 @@
     if (!cv) return;
     const ctx = cv.getContext('2d');
     let w, h, cols, drops, speeds;
-    const CHARS = '01ï½±ï½²ï½³ï½´ï½µï½¶ï½·ï½¸ï½¹ï½º#@$%&*<>=+/{\\}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const CHARS = '01ｱｲｳｴｵｶｷｸｹｺ#@$%&*<>=+/{\\}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const FONT = '14px "Share Tech Mono", monospace';
     const CELL = 18;
     function resize() {
