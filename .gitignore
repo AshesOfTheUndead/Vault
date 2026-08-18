@@ -1,0 +1,25 @@
+# binaries
+vault
+vault.exe
+*.exe
+*.dll
+
+# go workspace
+/go.work
+/go.work.sum
+
+# os junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# build artifacts
+/dist/
+/build/
+*.log

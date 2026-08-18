@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAULT  secure local secrets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230a0f12'/%3E%3Cstop offset='0.55' stop-color='%23050809'/%3E%3Cstop offset='1' stop-color='%23020305'/%3E%3C/linearGradient%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23a7f3d0'/%3E%3Cstop offset='0.5' stop-color='%2334d399'/%3E%3Cstop offset='1' stop-color='%23059669'/%3E%3C/linearGradient%3E%3ClinearGradient id='bd' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2334d399' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%2322d3ee' stop-opacity='0.35'/%3E%3C/linearGradient%3E%3Cfilter id='g' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='1.4'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23bg)'/%3E%3Cg stroke='%2334d399' stroke-opacity='0.07' stroke-width='0.5'%3E%3Cline x1='0' y1='8' x2='32' y2='8'/%3E%3Cline x1='0' y1='16' x2='32' y2='16'/%3E%3Cline x1='0' y1='24' x2='32' y2='24'/%3E%3Cline x1='8' y1='0' x2='8' y2='32'/%3E%3Cline x1='16' y1='0' x2='16' y2='32'/%3E%3Cline x1='24' y1='0' x2='24' y2='32'/%3E%3C/g%3E%3Crect x='0.5' y='0.5' width='31' height='31' rx='6.5' fill='none' stroke='url(%23bd)' stroke-width='1'/%3E%3Cpath d='M5 5 L16 28 L27 5' fill='none' stroke='%2334d399' stroke-width='5.5' stroke-opacity='0.55' filter='url(%23g)' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5 5 L16 28 L27 5' fill='none' stroke='url(%23v)' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5.5 5.5 L15.5 25' fill='none' stroke='%23d1fae5' stroke-width='1' stroke-opacity='0.7' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='3' r='1.4' fill='%236ee7b7'/%3E%3Crect x='13.5' y='29' width='5' height='1.2' rx='0.6' fill='%2334d399' fill-opacity='0.85'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #050608;
+    --bg-void: #020203;
+    --bg-deep: #07090c;
+    --surface: rgba(14, 18, 22, 0.50);
+    --surface-2: rgba(22, 28, 32, 0.62);
+    --surface-3: rgba(34, 44, 50, 0.72);
+    --surface-hi: rgba(50, 64, 70, 0.82);
+    --line: rgba(52, 211, 153, 0.12);
+    --line-soft: rgba(52, 211, 153, 0.06);
+    --line-bright: rgba(52, 211, 153, 0.38);
+    --ink: #e8f5ef;
+    --ink-2: #9fb8b0;
+    --ink-3: #5f7a72;
+    --ink-mute: #3a4d46;
+    --accent: #34d399;
+    --accent-hi: #6ee7b7;
+    --accent-lo: #059669;
+    --accent-glow: rgba(52, 211, 153, 0.30);
+    --amber: #fbbf24;
+    --cyan: #22d3ee;
+    --cyan-glow: rgba(34, 211, 238, 0.30);
+    --danger: #fb7185;
+    --danger-glow: rgba(251, 113, 133, 0.30);
+    --ok: #34d399;
+    --display: "Space Grotesk", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --term: "Share Tech Mono", "JetBrains Mono", monospace;
+    --r: 6px;
+    --r-lg: 12px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-quint: cubic-bezier(0.33, 1, 0.68, 1);
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { background: var(--bg-void); }
+
+  body {
+    background:
+      radial-gradient(1000px 700px at 92% -8%, rgba(52, 211, 153, 0.09), transparent 60%),
+      radial-gradient(900px 600px at -8% 110%, rgba(251, 191, 36, 0.045), transparent 58%),
+      radial-gradient(600px 400px at 50% 50%, rgba(34, 211, 238, 0.035), transparent 70%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "calt", "ss01", "ss02";
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: ''; position: fixed;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.07), transparent 60%);
+    pointer-events: none; z-index: 1;
+    left: var(--mx, 50%); top: var(--my, 50%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.4s var(--ease);
+    will-change: transform, left, top;
+    mix-blend-mode: screen;
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(52, 211, 153, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52, 211, 153, 0.025) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
+    animation: gridDrift 80s linear infinite;
+  }
+  @keyframes gridDrift { from { background-position: 0 0; } to { background-position: 56px 56px; } }
+  .bg-scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: repeating-linear-gradient(
+      0deg, transparent 0, transparent 2px,
+      rgba(52, 211, 153, 0.022) 2px, rgba(52, 211, 153, 0.022) 3px
+    );
+    mix-blend-mode: screen;
+    animation: scanDrift 8s linear infinite;
+  }
+  @keyframes scanDrift { from { background-position-y: 0; } to { background-position-y: 100px; } }
+  .bg-sweep {
+    position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(180deg, transparent 0%, rgba(52, 211, 153, 0.035) 50%, transparent 100%);
+    background-size: 100% 30%;
+    background-position: 0 -30%;
+    animation: sweep 14s linear infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes sweep { from { background-position: 0 -30%; } to { background-position: 0 130%; } }
+  .bg-vignette {
+    position: fixed; inset: 0; pointer-events: none; z-index: 3;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
+  }
+  #matrix-canvas {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.85;
+  }
+
+  .wrap {
+    max-width: 1040px; margin: 0 auto; padding: 56px 32px 80px;
+    position: relative; z-index: 4;
+    animation: boot 1s var(--ease-out) both;
+  }
+  @keyframes boot {
+    from { opacity: 0; filter: blur(8px); transform: translateY(-10px); }
+    to { opacity: 1; filter: blur(0); transform: none; }
+  }
+
+  header {
+    display: grid; grid-template-columns: 1fr auto; align-items: end;
+    gap: 24px; margin-bottom: 28px;
+    position: relative;
+  }
+  .brand-block { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .brand-eyebrow {
+    font-family: var(--term); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.36em; color: var(--accent);
+    text-transform: uppercase; opacity: 0;
+    display: flex; align-items: center; gap: 10px;
+    animation: fadeIn 0.7s var(--ease-out) 0.4s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 0.85; } }
+  .brand-eyebrow::before { content: '>'; color: var(--accent-lo); }
+  .brand-eyebrow .blink { animation: blink 1.1s steps(2) infinite; }
+  @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+  .brand h1 {
+    margin: 0; font-family: var(--display);
+    font-size: clamp(46px, 8vw, 86px); font-weight: 500;
+    line-height: 0.92; letter-spacing: -0.03em;
+    color: var(--ink);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .brand h1 .letter {
+    display: inline-block;
+    opacity: 0; transform: translateY(24px); filter: blur(10px);
+    animation: letterIn 0.85s var(--ease-out) forwards;
+    animation-delay: calc(0.18s + var(--i, 0) * 0.07s);
+  }
+  @keyframes letterIn { to { opacity: 1; transform: none; filter: blur(0); } }
+  .brand h1 .acc {
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(52, 211, 153, 0.5), 0 0 64px rgba(52, 211, 153, 0.22);
+    position: relative;
+    animation: letterIn 0.85s var(--ease-out) forwards, accBreathe 4.5s ease-in-out 1.2s infinite;
+    animation-delay: calc(0.18s + var(--i, 0) * 0.07s), 1.2s;
+  }
+  @keyframes accBreathe {
+    0%, 100% { text-shadow: 0 0 30px rgba(52, 211, 153, 0.5), 0 0 64px rgba(52, 211, 153, 0.22); }
+    50% { text-shadow: 0 0 38px rgba(52, 211, 153, 0.65), 0 0 90px rgba(52, 211, 153, 0.32); }
+  }
+  .brand h1 .acc::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transform: scaleX(0.3);
+    animation: lineIn 0.9s var(--ease-out) 1.2s forwards;
+  }
+  @keyframes lineIn { to { opacity: 1; transform: scaleX(1); } }
+  .brand h1 .v {
+    font-size: 0.22em; font-family: var(--mono); font-weight: 600;
+    color: var(--ink-3); letter-spacing: 0.1em;
+    border: 1px solid var(--line); padding: 4px 9px; border-radius: 4px;
+    align-self: center;
+    background: rgba(52, 211, 153, 0.04);
+    opacity: 0; animation: fadeIn 0.7s var(--ease-out) 0.8s forwards;
+  }
+
+  .brand .tag {
+    margin: 8px 0 0; color: var(--ink-2); font-size: 12.5px;
+    font-family: var(--mono); display: flex; align-items: center; gap: 10px;
+    max-width: 60ch; flex-wrap: wrap;
+    opacity: 0; animation: fadeIn 0.7s var(--ease-out) 0.65s forwards;
+  }
+  .tag .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--ok);
+    display: inline-block; flex: none;
+    box-shadow: 0 0 8px var(--ok), 0 0 18px var(--accent-glow);
+    animation: pulse 3.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--ok), 0 0 18px var(--accent-glow); }
+    50% { opacity: 0.55; box-shadow: 0 0 4px var(--ok), 0 0 8px var(--accent-glow); }
+  }
+  .tag code { font-family: var(--mono); color: var(--accent); font-size: 12px; }
+
+  .sys-chip {
+    display: grid; gap: 6px; align-self: end; justify-self: end;
+    font-family: var(--term); font-size: 10px; letter-spacing: 0.2em;
+    text-align: right; color: var(--ink-3); text-transform: uppercase;
+    padding: 12px 16px;
+    border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface);
+    backdrop-filter: blur(16px) saturate(1.35);
+    -webkit-backdrop-filter: blur(16px) saturate(1.35);
+    opacity: 0; animation: fadeIn 0.7s var(--ease-out) 0.9s forwards;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .sys-chip .line { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .sys-chip .led {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
+    box-shadow: 0 0 6px var(--ok); animation: pulse 3.5s ease-in-out infinite;
+  }
+  .sys-chip .v { color: var(--accent); font-weight: 600; }
+
+  .panel {
+    position: relative;
+    background: var(--surface);
+    backdrop-filter: blur(28px) saturate(1.55);
+    -webkit-backdrop-filter: blur(28px) saturate(1.55);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 0 0 1px rgba(0, 0, 0, 0.4),
+      0 24px 60px rgba(0, 0, 0, 0.65),
+      0 0 90px rgba(52, 211, 153, 0.045);
+    overflow: hidden;
+    transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+  .panel::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.045) 0%, transparent 30%, transparent 70%, rgba(251, 191, 36, 0.035) 100%);
+    mix-blend-mode: screen;
+  }
+  .panel::after {
+    content: ''; position: absolute; top: 0; left: 14%; right: 14%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.55), transparent);
+    pointer-events: none;
+  }
+  .panel:hover {
+    border-color: var(--line-bright);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 0 0 1px rgba(0, 0, 0, 0.4),
+      0 24px 60px rgba(0, 0, 0, 0.65),
+      0 0 110px rgba(52, 211, 153, 0.08);
+  }
+
+  .panel-title {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.05), transparent);
+    border-bottom: 1px solid var(--line-soft);
+    font-family: var(--term); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.22em; color: var(--ink-3); text-transform: uppercase;
+  }
+  .panel-title .dots { display: inline-flex; gap: 6px; }
+  .panel-title .dots i {
+    width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .panel-title:hover .dots i:nth-child(1) { background: rgba(251, 113, 133, 0.75); box-shadow: 0 0 10px rgba(251, 113, 133, 0.5); }
+  .panel-title:hover .dots i:nth-child(2) { background: rgba(251, 191, 36, 0.75); box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+  .panel-title:hover .dots i:nth-child(3) { background: rgba(52, 211, 153, 0.9); box-shadow: 0 0 10px var(--accent-glow); }
+  .panel-title .dots i:nth-child(1) { background: rgba(251, 113, 133, 0.4); }
+  .panel-title .dots i:nth-child(2) { background: rgba(251, 191, 36, 0.4); }
+  .panel-title .dots i:nth-child(3) { background: rgba(52, 211, 153, 0.5); }
+  .panel-title .path { color: var(--ink-2); }
+  .panel-title .path .sep { color: var(--ink-mute); margin: 0 2px; }
+  .panel-title .path .leaf { color: var(--accent); }
+  .panel-title .spacer { flex: 1; }
+  .panel-title .meta { color: var(--ink-3); font-size: 9.5px; letter-spacing: 0.18em; }
+  .panel-title .icon-btn { width: 26px; height: 26px; margin-left: 8px; }
+
+  .tabs {
+    display: inline-flex; gap: 2px;
+    background: rgba(2, 6, 8, 0.5);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 3px;
+    position: relative;
+  }
+  .tab {
+    padding: 7px 16px; border: 0; background: transparent;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-3); cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.3s var(--ease), background 0.3s var(--ease);
+    position: relative; z-index: 2;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .tab .tab-count {
+    font-size: 9.5px; color: var(--ink-mute);
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid var(--line);
+    border-radius: 3px; padding: 0 5px;
+    transition: color 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active { color: var(--accent); }
+  .tab.active .tab-count { color: var(--accent-hi); background: rgba(52, 211, 153, 0.15); border-color: var(--line-bright); }
+  .tab-indicator {
+    position: absolute; top: 3px; bottom: 3px;
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.18), rgba(52, 211, 153, 0.06));
+    border: 1px solid var(--line-bright);
+    border-radius: 4px;
+    box-shadow: 0 0 14px rgba(52, 211, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: transform 0.5s var(--ease-quint), width 0.5s var(--ease-quint);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .toolbar { margin-top: 28px; opacity: 0; animation: fadeUp 0.7s var(--ease-out) 0.7s forwards; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .toolbar .body {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 18px; flex-wrap: wrap;
+  }
+  .stats { display: flex; align-items: baseline; gap: 10px; }
+  .stats .prompt { color: var(--accent-lo); font-family: var(--mono); font-weight: 600; font-size: 16px; }
+  .stats .n {
+    font-family: var(--display); font-size: 32px; font-weight: 600;
+    color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1;
+    text-shadow: 0 0 18px var(--accent-glow);
+    letter-spacing: -0.02em;
+    transition: text-shadow 0.3s var(--ease);
+  }
+  .stats .l { font-family: var(--term); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+  .spacer { flex: 1; }
+
+  .search {
+    display: flex; align-items: center; gap: 6px; padding: 0 12px;
+    background: rgba(2, 6, 8, 0.65);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+    height: 36px; min-width: 220px;
+    position: relative;
+  }
+  .search::before { content: '$'; color: var(--accent-lo); font-family: var(--mono); font-weight: 600; font-size: 13px; }
+  .search:focus-within {
+    border-color: var(--line-bright);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14), inset 0 0 18px rgba(52, 211, 153, 0.07);
+    background: rgba(2, 6, 8, 0.85);
+  }
+  .search svg { width: 13px; height: 13px; stroke: var(--ink-3); flex: none; opacity: 0.7; }
+  .search input {
+    background: transparent; border: 0; outline: 0; color: var(--ink);
+    padding: 8px 0; flex: 1; min-width: 0;
+    font-family: var(--mono); font-size: 12.5px; caret-color: var(--accent);
+  }
+  .search input::placeholder { color: var(--ink-mute); font-style: italic; }
+  .search .kbd {
+    font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+    border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .btn {
+    padding: 11px 16px; border-radius: var(--r); border: 1px solid var(--line);
+    font-size: 11.5px; font-weight: 600; cursor: pointer;
+    font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform 0.18s var(--ease-quint), background 0.25s var(--ease), box-shadow 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+    background: var(--surface-2);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.7s var(--ease);
+  }
+  .btn:hover::before { left: 100%; }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 13px; height: 13px; }
+  .btn-sm { padding: 8px 12px; font-size: 10.5px; }
+  .btn-primary {
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.26), rgba(52, 211, 153, 0.09));
+    color: var(--accent-hi);
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 0 24px rgba(52, 211, 153, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 12px var(--accent-glow);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.38), rgba(52, 211, 153, 0.18));
+    border-color: var(--accent);
+    box-shadow: 0 0 36px rgba(52, 211, 153, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+  .btn-ghost { background: transparent; color: var(--ink-2); border-color: var(--line); }
+  .btn-ghost:hover {
+    color: var(--ink); background: var(--surface-2); border-color: var(--line-bright);
+    transform: translateY(-1px);
+  }
+  .btn-danger {
+    background: linear-gradient(180deg, rgba(251, 113, 133, 0.22), rgba(251, 113, 133, 0.07));
+    color: var(--danger); border-color: rgba(251, 113, 133, 0.45);
+    text-shadow: 0 0 10px var(--danger-glow);
+  }
+  .btn-danger:hover {
+    background: linear-gradient(180deg, rgba(251, 113, 133, 0.34), rgba(251, 113, 133, 0.16));
+    border-color: var(--danger);
+    box-shadow: 0 0 28px rgba(251, 113, 133, 0.36);
+    transform: translateY(-1px);
+  }
+  .btn:focus-visible, .search input:focus-visible, .icon-btn:focus-visible, input:focus-visible, textarea:focus-visible, .tab:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  .editor {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s var(--ease-quint), margin 0.5s var(--ease-quint);
+    margin: 0;
+  }
+  .editor.open { grid-template-rows: 1fr; margin: 16px 0 4px; }
+  .editor .gate { overflow: hidden; min-height: 0; }
+  .editor .panel .form { opacity: 0.4; transition: opacity 0.5s var(--ease) 0.15s; }
+  .editor.open .panel .form { opacity: 1; }
+
+  .form { display: grid; gap: 16px; padding: 20px; }
+  .field label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--term); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .field label::before { content: '▸'; color: var(--accent-lo); }
+  .field input, .field textarea {
+    width: 100%; padding: 12px 14px; border-radius: var(--r); outline: 0;
+    background: rgba(2, 6, 8, 0.75); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--mono); font-size: 13px; caret-color: var(--accent);
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--line-bright);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14), inset 0 0 18px rgba(52, 211, 153, 0.07);
+    background: rgba(2, 6, 8, 0.9);
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--ink-mute); font-style: italic; }
+  .field textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  .field .opt {
+    text-transform: none; letter-spacing: 0; font-size: 9.5px; font-weight: 400;
+    color: var(--ink-3); border: 1px solid var(--line); border-radius: 3px;
+    padding: 1px 6px; margin-left: 4px;
+  }
+  .input-wrap { position: relative; }
+  .reveal {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: var(--r); border: 0; background: transparent;
+    color: var(--ink-3); cursor: pointer; display: grid; place-items: center;
+    transition: color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease), transform 0.18s var(--ease);
+  }
+  .reveal:hover { color: var(--accent); background: rgba(52, 211, 153, 0.1); box-shadow: 0 0 14px rgba(52, 211, 153, 0.18); transform: translateY(-50%) scale(1.08); }
+  .reveal[data-on="1"] { color: var(--accent); }
+  .reveal svg { width: 15px; height: 15px; }
+  .keys {
+    font-size: 11px; color: var(--ink-3); font-family: var(--mono);
+    margin-top: -6px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  }
+  kbd {
+    font-family: var(--mono); font-size: 9.5px; padding: 1px 5px; border-radius: 3px;
+    border: 1px solid var(--line); border-bottom-width: 2px;
+    background: rgba(0, 0, 0, 0.5); color: var(--accent);
+  }
+  .actions { display: flex; gap: 9px; align-items: center; }
+  .actions .spacer { flex: 1; }
+  .btn-busy { opacity: 0.55; pointer-events: none; }
+
+  .toggle {
+    display: inline-flex; align-items: center; gap: 12px;
+    cursor: pointer; user-select: none;
+  }
+  .toggle input { display: none; }
+  .toggle .track {
+    width: 44px; height: 24px; border-radius: 12px;
+    background: rgba(2, 6, 8, 0.7);
+    border: 1px solid var(--line);
+    position: relative;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .toggle .track::after {
+    content: ''; position: absolute; left: 2px; top: 50%; transform: translateY(-50%) scale(0.85);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--ink-3);
+    transition: transform 0.4s var(--ease-bounce), background 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .toggle input:checked + .track {
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.28), rgba(52, 211, 153, 0.1));
+    border-color: var(--line-bright);
+    box-shadow: 0 0 14px rgba(52, 211, 153, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .toggle input:checked + .track::after {
+    transform: translateY(-50%) translateX(20px) scale(1);
+    background: var(--accent-hi);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .toggle .label {
+    font-family: var(--term); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3);
+    transition: color 0.3s var(--ease);
+  }
+  .toggle input:checked ~ .label { color: var(--accent); }
+  .toggle .label .opt { font-size: 9.5px; color: var(--ink-mute); letter-spacing: 0; margin-left: 6px; text-transform: none; }
+
+  .ledger { margin-top: 22px; opacity: 0; animation: fadeUp 0.7s var(--ease-out) 0.9s forwards; }
+  .pane { padding: 10px; overflow: hidden; }
+  .pane[hidden] { display: none; }
+  .pane-content { animation: paneIn 0.5s var(--ease-out) both; }
+  @keyframes paneIn {
+    from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+
+  .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .list li {
+    display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 13px 14px;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease-quint), box-shadow 0.3s var(--ease);
+    animation: rowIn 0.6s var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+  }
+  .list li::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: transparent; transition: background 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .list li::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(120deg, transparent 30%, rgba(52, 211, 153, 0.06) 50%, transparent 70%);
+    background-size: 250% 100%; background-position: 100% 0;
+    transition: background-position 0.8s var(--ease);
+    opacity: 0;
+  }
+  .list li:hover::after { background-position: 0 0; opacity: 1; }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(-14px); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  .list li:hover {
+    background: var(--surface-2);
+    border-color: var(--line-bright);
+    box-shadow: 0 0 32px rgba(52, 211, 153, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+  }
+  .list li:hover::before { background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+  .list li[data-active] { background: var(--surface-3); border-color: var(--line-bright); }
+  .list li[data-active]::before { background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+
+  .list .idx {
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-lo); transition: color 0.3s var(--ease), text-shadow 0.3s var(--ease);
+    text-align: right; letter-spacing: -0.02em;
+  }
+  .list li:hover .idx, .list li[data-active] .idx { color: var(--accent); text-shadow: 0 0 14px var(--accent-glow); }
+  .list .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .list .name {
+    font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .list .name::before { content: '$'; color: var(--accent-lo); font-weight: 500; }
+
+  .env-row {
+    grid-template-columns: 40px minmax(120px, auto) minmax(0, 1fr) auto auto !important;
+  }
+  .env-key {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent-hi);
+    letter-spacing: 0.04em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.25);
+  }
+  .env-eq { color: var(--ink-mute); font-family: var(--mono); font-size: 13px; user-select: none; }
+  .env-val-wrap {
+    display: flex; align-items: center; gap: 7px; min-width: 0;
+  }
+  .env-val-wrap .env-eq { flex: none; }
+  .env-val-wrap .env-val { flex: 1; min-width: 0; }
+  .env-val {
+    font-family: var(--mono); font-size: 12.5px; color: var(--ink-2);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+  .env-val.masked {
+    color: var(--ink-3); letter-spacing: 0.3em;
+    filter: blur(0.3px);
+  }
+  .env-val.empty { color: var(--ink-mute); font-style: italic; }
+  .badge-secret {
+    font-family: var(--term); font-size: 9px; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 3px;
+    background: rgba(251, 191, 36, 0.1); color: var(--amber);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .badge-public {
+    font-family: var(--term); font-size: 9px; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 3px;
+    background: rgba(34, 211, 238, 0.08); color: var(--cyan);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+  }
+
+  .list .sub {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56ch;
+    letter-spacing: 0.04em;
+  }
+  .list .sub::before { content: '↳ '; color: var(--ink-mute); }
+  .list .det {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3); font-style: italic;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62ch;
+  }
+  .list .det::before { content: '# '; font-style: normal; color: var(--accent); }
+  .list .badge {
+    font-family: var(--term); font-size: 9.5px; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
+    background: rgba(52, 211, 153, 0.08); color: var(--accent);
+    border: 1px solid var(--line-bright);
+  }
+  .list .icons { display: flex; gap: 4px; opacity: 0.32; transition: opacity 0.3s var(--ease); }
+  .list li:hover .icons, .list li[data-active] .icons { opacity: 1; }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: var(--r); border: 0;
+    background: transparent; color: var(--ink-2); cursor: pointer;
+    display: grid; place-items: center;
+    transition: color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease-quint);
+  }
+  .icon-btn:hover { color: var(--accent); background: rgba(52, 211, 153, 0.1); box-shadow: 0 0 16px rgba(52, 211, 153, 0.18); transform: scale(1.1); }
+  .icon-btn.danger:hover { color: var(--danger); background: rgba(251, 113, 133, 0.12); box-shadow: 0 0 16px rgba(251, 113, 133, 0.24); }
+  .icon-btn svg { width: 14px; height: 14px; }
+
+  .empty {
+    text-align: center; padding: 80px 24px; color: var(--ink-3);
+    font-family: var(--mono); font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .empty .lock-ic {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(52, 211, 153, 0.06);
+    border: 1px solid var(--line);
+    color: var(--accent-lo);
+    box-shadow: 0 0 32px rgba(52, 211, 153, 0.1), inset 0 0 20px rgba(52, 211, 153, 0.06);
+    animation: floatPulse 4s ease-in-out infinite;
+  }
+  @keyframes floatPulse {
+    0%, 100% { transform: translateY(0); box-shadow: 0 0 32px rgba(52, 211, 153, 0.1), inset 0 0 20px rgba(52, 211, 153, 0.06); }
+    50% { transform: translateY(-4px); box-shadow: 0 0 44px rgba(52, 211, 153, 0.18), inset 0 0 26px rgba(52, 211, 153, 0.1); }
+  }
+  .empty .lock-ic svg { width: 28px; height: 28px; }
+  .empty p { margin: 0; }
+  .empty .hint { font-size: 11.5px; color: var(--ink-mute); }
+  .empty .hint strong { color: var(--accent); font-weight: 600; }
+  .empty .prompt-line {
+    margin-top: 6px; font-family: var(--mono); color: var(--ink-3); font-size: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .empty .prompt-line .c {
+    display: inline-block; width: 7px; height: 12px;
+    background: var(--accent); animation: blink 1.1s steps(2) infinite;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  .foot-stats {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-top: 22px; padding: 13px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line); border-radius: var(--r);
+    font-family: var(--term); font-size: 10px; letter-spacing: 0.18em;
+    color: var(--ink-3); text-transform: uppercase;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    opacity: 0; animation: fadeUp 0.7s var(--ease-out) 1.1s forwards;
+  }
+  .foot-stats .dot { width: 6px; height: 6px; box-shadow: 0 0 6px var(--ok); }
+  .foot-stats .live { display: inline-flex; align-items: center; gap: 8px; }
+  .foot-stats .live .v { color: var(--accent); }
+  .foot-stats .right { display: inline-flex; align-items: center; gap: 8px; }
+  .foot-stats .right .c {
+    display: inline-block; width: 7px; height: 11px;
+    background: var(--accent); animation: blink 1.1s steps(2) infinite;
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+
+  .about {
+    margin-top: 52px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    opacity: 0; animation: fadeUp 0.8s var(--ease-out) 1.3s forwards;
+  }
+  .about .panel { padding: 24px; }
+  .about h3 {
+    margin: 0 0 14px; font-family: var(--term); font-size: 10.5px; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.22em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .about h3::before { content: '▸'; color: var(--accent-lo); }
+  .about p { margin: 0 0 10px; color: var(--ink-2); font-size: 12.5px; line-height: 1.6; }
+  .about p:last-child { margin: 0; }
+  .about code {
+    font-family: var(--mono); font-size: 11.5px;
+    background: rgba(52, 211, 153, 0.07);
+    border: 1px solid var(--line-soft); border-radius: 3px;
+    padding: 1px 5px; color: var(--accent);
+  }
+  .about strong { color: var(--accent); font-weight: 600; }
+
+  .toasts {
+    position: fixed; right: 20px; bottom: 20px;
+    display: flex; flex-direction: column; gap: 10px; z-index: 60;
+  }
+  .toast {
+    min-width: 300px; max-width: 380px; padding: 14px 16px 16px; border-radius: var(--r-lg);
+    background: var(--surface-hi);
+    backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border: 1px solid var(--line-bright); color: var(--ink);
+    font-family: var(--mono); font-size: 12.5px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+    align-items: start;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 36px rgba(52, 211, 153, 0.2);
+    animation: toastIn 0.45s var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(30px) scale(0.92); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  .toast.out { animation: toastOut 0.35s var(--ease) both; }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateX(30px) scale(0.95); filter: blur(4px); }
+  }
+  .toast .toast-ic {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; flex: none;
+    background: rgba(52, 211, 153, 0.15); color: var(--accent);
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.25), inset 0 0 8px rgba(52, 211, 153, 0.1);
+  }
+  .toast.err .toast-ic {
+    background: rgba(251, 113, 133, 0.15); color: var(--danger);
+    box-shadow: 0 0 12px rgba(251, 113, 133, 0.25), inset 0 0 8px rgba(251, 113, 133, 0.1);
+  }
+  .toast .toast-ic svg { width: 14px; height: 14px; }
+  .toast .toast-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .toast .toast-title {
+    font-weight: 600; color: var(--ink); font-size: 12.5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .toast .toast-msg {
+    color: var(--ink-2); font-size: 11.5px; line-height: 1.45;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast .toast-msg code {
+    font-family: var(--mono); color: var(--accent); font-size: 11.5px;
+    background: rgba(52, 211, 153, 0.08); padding: 0 4px; border-radius: 3px;
+  }
+  .toast .toast-undo {
+    background: transparent; border: 1px solid var(--line-bright);
+    color: var(--accent); padding: 5px 10px; border-radius: 4px;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+    align-self: center;
+  }
+  .toast .toast-undo:hover { background: rgba(52, 211, 153, 0.15); color: var(--accent-hi); }
+  .toast .toast-bar {
+    position: absolute; bottom: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    transform-origin: left; animation: toastBar 2.8s linear forwards;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .toast.err .toast-bar { background: linear-gradient(90deg, transparent, var(--danger), transparent); box-shadow: 0 0 8px var(--danger-glow); }
+  @keyframes toastBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 70;
+    background: rgba(2, 4, 6, 0.6);
+    backdrop-filter: blur(8px) saturate(1.2); -webkit-backdrop-filter: blur(8px) saturate(1.2);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s var(--ease);
+    display: grid; place-items: center;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(520px, calc(100vw - 32px));
+    background: var(--surface-hi);
+    backdrop-filter: blur(32px) saturate(1.5); -webkit-backdrop-filter: blur(32px) saturate(1.5);
+    border: 1px solid var(--line-bright);
+    border-radius: var(--r-lg);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 30px 80px rgba(0, 0, 0, 0.7),
+      0 0 80px rgba(52, 211, 153, 0.12);
+    padding: 28px 28px 24px;
+    transform: scale(0.92) translateY(12px); opacity: 0;
+    transition: transform 0.4s var(--ease-quint), opacity 0.3s var(--ease);
+    position: relative; overflow: hidden;
+  }
+  .modal-backdrop.open .modal { transform: none; opacity: 1; }
+  .modal::after {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.5), transparent);
+  }
+  .modal-ic {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(251, 113, 133, 0.12);
+    color: var(--danger);
+    box-shadow: 0 0 24px rgba(251, 113, 133, 0.18), inset 0 0 18px rgba(251, 113, 133, 0.08);
+    margin: 0 auto 16px;
+    animation: modalIc 0.6s var(--ease-out) 0.15s both;
+  }
+  @keyframes modalIc {
+    from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .modal-ic svg { width: 22px; height: 22px; }
+  .modal h2 {
+    margin: 0 0 8px; font-family: var(--display); font-size: 22px; font-weight: 500;
+    text-align: center; color: var(--ink); letter-spacing: -0.02em;
+  }
+  .modal p {
+    margin: 0; text-align: center; color: var(--ink-2); font-size: 13px; line-height: 1.5;
+  }
+  .modal p .name {
+    font-family: var(--mono); color: var(--danger); font-weight: 600;
+    background: rgba(251, 113, 133, 0.1); padding: 1px 6px; border-radius: 4px;
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .modal .modal-hint {
+    margin: 8px 0 22px; color: var(--ink-mute); font-size: 11.5px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .modal .modal-hint::before { content: '⏎'; color: var(--ink-mute); }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions .btn { flex: 1; justify-content: center; padding: 12px 18px; }
+
+  /* shortcuts help modal */
+  .shortcuts-list {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px 24px;
+    margin: 12px 0 22px;
+  }
+  .shortcuts-list .row {
+    display: contents;
+  }
+  .shortcuts-list .desc {
+    color: var(--ink-2); font-size: 12.5px; font-family: var(--mono);
+    display: flex; align-items: center;
+  }
+  .shortcuts-list .keys-cell {
+    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  }
+  .shortcuts-list kbd { font-size: 10.5px; padding: 2px 7px; }
+
+  /* command palette */
+  .cmd-backdrop {
+    position: fixed; inset: 0; z-index: 80;
+    background: rgba(2, 4, 6, 0.7);
+    backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s var(--ease);
+    display: flex; justify-content: center; align-items: flex-start;
+    padding-top: 12vh;
+  }
+  .cmd-backdrop.open { opacity: 1; pointer-events: auto; }
+  .cmd-modal {
+    width: min(640px, calc(100vw - 32px));
+    background: var(--surface-hi);
+    backdrop-filter: blur(32px) saturate(1.6); -webkit-backdrop-filter: blur(32px) saturate(1.6);
+    border: 1px solid var(--line-bright);
+    border-radius: var(--r-lg);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 30px 90px rgba(0, 0, 0, 0.75),
+      0 0 90px rgba(52, 211, 153, 0.18);
+    overflow: hidden;
+    transform: translateY(-20px) scale(0.96); opacity: 0;
+    transition: transform 0.35s var(--ease-quint), opacity 0.25s var(--ease);
+  }
+  .cmd-backdrop.open .cmd-modal { transform: none; opacity: 1; }
+  .cmd-input-wrap {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.04), transparent);
+  }
+  .cmd-input-wrap svg { width: 16px; height: 16px; stroke: var(--accent); flex: none; }
+  .cmd-input {
+    flex: 1; min-width: 0; background: transparent; border: 0; outline: 0;
+    color: var(--ink); font-family: var(--mono); font-size: 15px;
+    caret-color: var(--accent);
+  }
+  .cmd-input::placeholder { color: var(--ink-mute); font-style: italic; }
+  .cmd-kbd {
+    font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+    border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.3); letter-spacing: 0.1em;
+  }
+  .cmd-results {
+    list-style: none; margin: 0; padding: 6px;
+    max-height: 50vh; overflow-y: auto;
+  }
+  .cmd-group {
+    padding: 8px 12px 4px; font-family: var(--term); font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mute);
+    font-weight: 600;
+  }
+  .cmd-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--r); cursor: pointer;
+    transition: background 0.15s var(--ease), color 0.15s var(--ease);
+    color: var(--ink-2); font-family: var(--mono); font-size: 13px;
+    position: relative;
+  }
+  .cmd-item:hover, .cmd-item.selected {
+    background: rgba(52, 211, 153, 0.08);
+    color: var(--ink);
+  }
+  .cmd-item.selected {
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .cmd-item .cmd-ic {
+    width: 22px; height: 22px; border-radius: 4px;
+    display: grid; place-items: center; flex: none;
+    background: rgba(52, 211, 153, 0.08); color: var(--accent);
+    border: 1px solid var(--line);
+  }
+  .cmd-item .cmd-ic svg { width: 12px; height: 12px; }
+  .cmd-item .cmd-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cmd-item .cmd-cat {
+    font-family: var(--term); font-size: 9.5px; color: var(--ink-mute);
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px;
+    flex: none;
+  }
+  .cmd-empty {
+    padding: 30px 20px; text-align: center; color: var(--ink-mute);
+    font-family: var(--mono); font-size: 12.5px;
+  }
+  .cmd-empty .c {
+    display: inline-block; width: 7px; height: 12px; background: var(--accent);
+    margin-left: 4px; animation: blink 1.1s steps(2) infinite;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  /* live connection status indicator (sys-chip LED) */
+  .sys-chip .led[data-state="ok"]    { background: var(--ok);     box-shadow: 0 0 6px var(--ok); }
+  .sys-chip .led[data-state="warn"]  { background: var(--amber);   box-shadow: 0 0 6px var(--amber); animation: pulse 1.6s ease-in-out infinite; }
+  .sys-chip .led[data-state="err"]   { background: var(--danger);  box-shadow: 0 0 8px var(--danger); animation: pulse 1.1s ease-in-out infinite; }
+  .sys-chip .v[data-state="warn"]    { color: var(--amber); }
+  .sys-chip .v[data-state="err"]     { color: var(--danger); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(52, 211, 153, 0.2); border-radius: 6px;
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(52, 211, 153, 0.36); }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::selection { background: rgba(52, 211, 153, 0.3); color: var(--ink); }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 36px 18px 60px; }
+    header { grid-template-columns: 1fr; gap: 16px; }
+    .sys-chip { justify-self: start; text-align: left; }
+    .sys-chip .line { justify-content: flex-start; }
+    .about { grid-template-columns: 1fr; gap: 12px; }
+    .list li { grid-template-columns: 32px 1fr auto; gap: 10px; padding: 12px 12px; }
+    .list .badge, .badge-public, .badge-secret { display: none; }
+    .stats .n { font-size: 26px; }
+    .toolbar .body { gap: 12px; padding: 14px; }
+    .search { min-width: 100%; }
+    .brand h1 { font-size: 52px; }
+    .modal { padding: 24px 20px 20px; }
+    .env-row { grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) auto !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .bg-scanlines, .bg-sweep, #matrix-canvas { display: none; }
+    body::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid" aria-hidden="true"></div>
+<canvas id="matrix-canvas" aria-hidden="true"></canvas>
+<div class="bg-scanlines" aria-hidden="true"></div>
+<div class="bg-sweep" aria-hidden="true"></div>
+<div class="bg-vignette" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand-block">
+      <div class="brand-eyebrow">
+        <span>SECURE&nbsp;LOCAL&nbsp;VAULT</span>
+        <span class="blink">_</span>
+      </div>
+      <div class="brand">
+        <h1>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.2</span>
+        </h1>
+      </div>
+      <p class="tag">
+        <span class="dot" aria-hidden="true"></span>
+        Your secrets and env vars, kept in plain sight. Stored locally as plaintext files. Run <code>vault.exe</code> to launch.
+      </p>
+    </div>
+    <div class="sys-chip" aria-hidden="true">
+      <div class="line"><span class="led"></span><span>SYS</span><span class="v">ONLINE</span></div>
+      <div class="line"><span>NODE</span><span class="v">127.0.0.1:7575</span></div>
+      <div class="line"><span>ENC</span><span class="v">PLAINTEXT</span></div>
+    </div>
+  </header>
+
+  <div class="toolbar panel">
+    <div class="panel-title">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="path">~<span class="sep">/</span>vault<span class="sep">/</span><span class="leaf" id="panePath">secrets</span></span>
+      <span class="spacer"></span>
+      <span class="meta">LOCAL · AUTO SYNC 4S</span>
+    </div>
+    <div class="body">
+      <div class="stats">
+        <span class="prompt">&gt;</span>
+        <span class="n" id="statN">0</span>
+        <span class="l" id="statL">secrets</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="secrets">
+          <span>Secrets</span>
+          <span class="tab-count" id="tabCountSecrets">0</span>
+        </button>
+        <button class="tab" data-tab="env">
+          <span>Env Vars</span>
+          <span class="tab-count" id="tabCountEnv">0</span>
+        </button>
+        <span class="tab-indicator" id="tabIndicator"></span>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="text" placeholder="grep…" autocomplete="off" spellcheck="false">
+        <span class="kbd">/</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="exportEnvBtn" hidden title="Export as .env file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Export .env
+      </button>
+      <button class="btn btn-ghost btn-sm" id="importEnvBtn" hidden title="Import .env file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+        Import .env
+      </button>
+      <button class="btn btn-ghost btn-sm" id="helpBtn" title="Keyboard shortcuts (?)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+      <button class="btn btn-primary" id="newBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="newBtnLabel">New secret</span>
+      </button>
+      <input type="file" id="envFileInput" accept=".env,.txt,text/plain" hidden>
+    </div>
+  </div>
+
+  <section class="editor" id="editor">
+    <div class="gate">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="path">~/vault/secrets<span class="sep">/</span><span class="leaf" id="editPathLabel">new</span></span>
+          <span class="spacer"></span>
+          <span class="meta" id="editWho"></span>
+          <button class="icon-btn" id="editClose" title="Close (Esc)" aria-label="Close editor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <form class="form" id="editForm">
+          <div class="field">
+            <label for="fName">Name</label>
+            <input id="fName" type="text" placeholder="my_secret" autocomplete="off" spellcheck="false" required>
+          </div>
+          <div class="field">
+            <label for="fVal">Value</label>
+            <div class="input-wrap">
+              <input id="fVal" type="password" placeholder="enter secret value…" autocomplete="off" spellcheck="false" required>
+              <button type="button" class="reveal" id="fReveal" title="Show / hide value" aria-label="Show or hide value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fDet">Details <span class="opt">optional</span></label>
+            <textarea id="fDet" rows="3" placeholder="# notes, hints, or context for this secret…" autocomplete="off" spellcheck="false"></textarea>
+          </div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
+          <div class="actions">
+            <button type="button" class="btn btn-danger" id="delBtn" hidden>Delete</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveBtn">Save secret</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="editor" id="envEditor">
+    <div class="gate">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="path">~/vault/envvars<span class="sep">/</span><span class="leaf" id="envEditPathLabel">new</span></span>
+          <span class="spacer"></span>
+          <span class="meta" id="envEditWho"></span>
+          <button class="icon-btn" id="envEditClose" title="Close (Esc)" aria-label="Close editor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <form class="form" id="envEditForm">
+          <div class="field">
+            <label for="fKey">Key</label>
+            <input id="fKey" type="text" placeholder="DATABASE_URL" autocomplete="off" spellcheck="false" required
+              style="text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;">
+          </div>
+          <div class="field">
+            <label for="fEnvVal">Value</label>
+            <div class="input-wrap">
+              <input id="fEnvVal" type="password" placeholder="postgres://user:pass@host:5432/db" autocomplete="off" spellcheck="false" required>
+              <button type="button" class="reveal" id="fEnvReveal" title="Show / hide value" aria-label="Show or hide value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Visibility</label>
+            <label class="toggle" style="margin-top: 4px;">
+              <input type="checkbox" id="fSecret">
+              <span class="track"></span>
+              <span class="label">Mark as secret <span class="opt">value masked in lists</span></span>
+            </label>
+          </div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
+          <div class="actions">
+            <button type="button" class="btn btn-danger" id="envDelBtn" hidden>Delete</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-ghost" id="envCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="envSaveBtn">Save env var</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="ledger panel">
+    <div class="panel-title">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="path">~<span class="sep">/</span>vault<span class="sep">/</span><span class="leaf">store</span></span>
+      <span class="spacer"></span>
+      <span class="meta">SORTED BY MTIME DESC</span>
+    </div>
+    <div class="pane" id="paneSecrets">
+      <div class="pane-content">
+        <ul class="list" id="list"></ul>
+      </div>
+    </div>
+    <div class="pane" id="paneEnv" hidden>
+      <div class="pane-content">
+        <ul class="list" id="envList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot-stats">
+    <span class="live"><span class="dot" aria-hidden="true"></span>vault · <span class="v">running</span></span>
+    <span class="right"><span id="footCount">0 secrets · 0 bytes</span><span class="c"></span></span>
+  </div>
+
+  <section class="about" aria-label="About this page">
+    <div class="panel">
+      <h3>What this is</h3>
+      <p>A tiny private vault for secrets you don't want in chat logs: API keys, passwords, tokens.</p>
+      <p>It also stores environment variables, Render style. Mark sensitive ones as secret to mask them in lists.</p>
+    </div>
+    <div class="panel">
+      <h3>Where things live</h3>
+      <p>Secrets live in <code>~/Vault/Secrets/</code>. Env vars live in <code>~/Vault/EnvVars/</code>.</p>
+      <p>Each entry gets its own folder with <code>value.txt</code> and metadata. Nothing is encrypted by design.</p>
+    </div>
+    <div class="panel">
+      <h3>How to use</h3>
+      <p>Switch tabs between Secrets and Env Vars. <code>/</code> focuses the filter. The eye reveals a value, the copy icon copies it, the trash icon opens a confirmation dialog to delete. Press <kbd>?</kbd> for full shortcuts.</p>
+    </div>
+  </section>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal">
+    <div class="modal-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>
+    </div>
+    <h2 id="confirmTitle">Delete this entry?</h2>
+    <p>Are you sure you want to delete <span class="name" id="confirmName">entry</span>?</p>
+    <p class="modal-hint">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="confirmCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal">
+    <h2 id="helpTitle">Keyboard Shortcuts</h2>
+    <div class="shortcuts-list">
+      <div class="row"><span class="desc">Focus search</span><span class="keys-cell"><kbd>/</kbd></span></div>
+      <div class="row"><span class="desc">New secret (in secrets tab)</span><span class="keys-cell"><kbd>N</kbd></span></div>
+      <div class="row"><span class="desc">New env var (in env tab)</span><span class="keys-cell"><kbd>E</kbd></span></div>
+      <div class="row"><span class="desc">Switch to Secrets tab</span><span class="keys-cell"><kbd>1</kbd></span></div>
+      <div class="row"><span class="desc">Switch to Env Vars tab</span><span class="keys-cell"><kbd>2</kbd></span></div>
+      <div class="row"><span class="desc">Save current editor</span><span class="keys-cell"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span></div>
+      <div class="row"><span class="desc">Close editor / modal</span><span class="keys-cell"><kbd>Esc</kbd></span></div>
+      <div class="row"><span class="desc">Show this help</span><span class="keys-cell"><kbd>?</kbd></span></div>
+      <div class="row"><span class="desc">Open command palette</span><span class="keys-cell"><kbd>Ctrl</kbd>+<kbd>K</kbd></span></div>
+      <div class="row"><span class="desc">Manual refresh</span><span class="keys-cell"><kbd>R</kbd></span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="helpClose" style="flex:1;">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- command palette -->
+<div class="cmd-backdrop" id="cmdBackdrop" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="cmd-modal" role="combobox" aria-expanded="true">
+    <div class="cmd-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actions…" autocomplete="off" spellcheck="false">
+      <span class="cmd-kbd">ESC</span>
+    </div>
+    <ul class="cmd-results" id="cmdResults" role="listbox"></ul>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const API = '';
+  const $ = (s) => document.querySelector(s);
+  const list = $('#list'), envList = $('#envList'), q = $('#q'), statN = $('#statN'), statL = $('#statL');
+  const footCount = $('#footCount');
+  const editor = $('#editor'), editPathLabel = $('#editPathLabel'), editWho = $('#editWho');
+  const fName = $('#fName'), fVal = $('#fVal'), fDet = $('#fDet'), fReveal = $('#fReveal');
+  const delBtn = $('#delBtn'), saveBtn = $('#saveBtn');
+  const envEditor = $('#envEditor'), envEditPathLabel = $('#envEditPathLabel'), envEditWho = $('#envEditWho');
+  const fKey = $('#fKey'), fEnvVal = $('#fEnvVal'), fSecret = $('#fSecret'), fEnvReveal = $('#fEnvReveal');
+  const envDelBtn = $('#envDelBtn'), envSaveBtn = $('#envSaveBtn');
+  const confirmModal = $('#confirmModal'), confirmName = $('#confirmName');
+  const confirmCancel = $('#confirmCancel'), confirmDelete = $('#confirmDelete');
+  const helpModal = $('#helpModal'), helpBtn = $('#helpBtn'), helpClose = $('#helpClose');
+  const tabs = $('#tabs'), tabIndicator = $('#tabIndicator');
+  const paneSecrets = $('#paneSecrets'), paneEnv = $('#paneEnv');
+  const panePath = $('#panePath'), newBtnLabel = $('#newBtnLabel');
+  const tabCountSecrets = $('#tabCountSecrets'), tabCountEnv = $('#tabCountEnv');
+  const exportEnvBtn = $('#exportEnvBtn'), importEnvBtn = $('#importEnvBtn'), envFileInput = $('#envFileInput');
+  const cmdBackdrop = $('#cmdBackdrop'), cmdInput = $('#cmdInput'), cmdResults = $('#cmdResults');
+  const sysLed = document.querySelector('.sys-chip .led');
+  const sysOnline = document.querySelector('.sys-chip .v'); // the ONLINE word
+
+  let data = [], envData = [], editing = null, envEditing = null, filter = '', pendingDelete = null, currentTab = 'secrets';
+  let lastCount = 0;
+  let undoBuffer = null; // for delete undo
+
+  const fmtBytes = (n) => n < 1024 ? n + ' B' : (n / 1024).toFixed(1) + ' KB';
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function maskValue(v) {
+    if (!v) return '';
+    return '•'.repeat(Math.min(12, Math.max(8, v.length)));
+  }
+
+  function notify(msg, kind, opts) {
+    kind = kind || 'ok';
+    opts = opts || {};
+    const t = document.createElement('div');
+    t.className = 'toast ' + kind;
+    const ic = kind === 'err'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    const undoHtml = opts.undo ? `<button class="toast-undo" id="${opts.undoId}">Undo</button>` : '';
+    t.innerHTML = `
+      <div class="toast-ic">${ic}</div>
+      <div class="toast-body">
+        <div class="toast-title">${kind === 'err' ? 'Error' : 'Success'}</div>
+        <div class="toast-msg">${msg}</div>
+      </div>
+      ${undoHtml}
+      <div class="toast-bar"></div>
+    `;
+    $('#toasts').appendChild(t);
+    const timeout = setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 380); }, opts.undo ? 5000 : 2800);
+    if (opts.undo && opts.undoId) {
+      const undoBtn = t.querySelector('#' + opts.undoId);
+      if (undoBtn) undoBtn.addEventListener('click', () => {
+        clearTimeout(timeout);
+        t.classList.add('out');
+        setTimeout(() => t.remove(), 380);
+        opts.undo();
+      });
+    }
+  }
+
+  function animateCount(el, from, to, duration) {
+    duration = duration || 600;
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function setStat(n, label) {
+    if (n === lastCount) { statN.textContent = n; }
+    else {
+      const from = lastCount;
+      lastCount = n;
+      animateCount(statN, from, n, 600);
+    }
+    statL.textContent = label;
+  }
+
+  function positionTabIndicator() {
+    const activeTab = tabs.querySelector('.tab.active');
+    if (!activeTab) return;
+    const rect = activeTab.getBoundingClientRect();
+    const parentRect = tabs.getBoundingClientRect();
+    tabIndicator.style.width = rect.width + 'px';
+    tabIndicator.style.transform = `translateX(${rect.left - parentRect.left - 4}px)`;
+  }
+  function switchTab(tab) {
+    if (tab === currentTab) return;
+    currentTab = tab;
+    tabs.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    positionTabIndicator();
+    const showSecrets = tab === 'secrets';
+    paneSecrets.hidden = !showSecrets;
+    paneEnv.hidden = showSecrets;
+    panePath.textContent = showSecrets ? 'secrets' : 'envvars';
+    newBtnLabel.textContent = showSecrets ? 'New secret' : 'New env var';
+    exportEnvBtn.hidden = showSecrets;
+    importEnvBtn.hidden = showSecrets;
+    if (envEditor.classList.contains('open')) closeEnvEditor();
+    if (editor.classList.contains('open')) closeEditor();
+    const pane = showSecrets ? paneSecrets : paneEnv;
+    const content = pane.querySelector('.pane-content');
+    content.style.animation = 'none';
+    void content.offsetWidth;
+    content.style.animation = '';
+    render();
+  }
+  tabs.addEventListener('click', (ev) => {
+    const t = ev.target.closest('.tab');
+    if (t) switchTab(t.dataset.tab);
+  });
+
+  function showConfirm(name, kind) {
+    pendingDelete = { name, kind };
+    confirmName.textContent = name;
+    confirmModal.classList.add('open');
+    setTimeout(() => confirmDelete.focus(), 200);
+  }
+  function hideConfirm() {
+    pendingDelete = null;
+    confirmModal.classList.remove('open');
+  }
+
+  function openEditor(name) {
+    editing = name || null;
+    editPathLabel.textContent = name ? 'edit' : 'new';
+    editWho.textContent = name ? ('> ' + name) : '> awaiting input…';
+    delBtn.hidden = !name;
+    fName.value = name || '';
+    const d = name ? data.find(x => x.name === name) : null;
+    fVal.value = d ? d.value : '';
+    fDet.value = d ? (d.details || '') : '';
+    fVal.type = 'password';
+    delete fReveal.dataset.on;
+    editor.classList.add('open');
+    setTimeout(() => (name ? fVal : fName).focus(), 120);
+  }
+  function closeEditor() {
+    editor.classList.remove('open');
+    editing = null;
+    fName.value = fVal.value = fDet.value = '';
+    fVal.type = 'password';
+    delete fReveal.dataset.on;
+    delBtn.hidden = true;
+  }
+
+  function openEnvEditor(key) {
+    envEditing = key || null;
+    envEditPathLabel.textContent = key ? 'edit' : 'new';
+    envEditWho.textContent = key ? ('> ' + key) : '> awaiting input…';
+    envDelBtn.hidden = !key;
+    fKey.value = key || '';
+    const d = key ? envData.find(x => x.key === key) : null;
+    fEnvVal.value = d ? d.value : '';
+    fSecret.checked = d ? d.secret : false;
+    fEnvVal.type = 'password';
+    delete fEnvReveal.dataset.on;
+    envEditor.classList.add('open');
+    setTimeout(() => (key ? fEnvVal : fKey).focus(), 120);
+  }
+  function closeEnvEditor() {
+    envEditor.classList.remove('open');
+    envEditing = null;
+    fKey.value = fEnvVal.value = '';
+    fSecret.checked = false;
+    fEnvVal.type = 'password';
+    delete fEnvReveal.dataset.on;
+    envDelBtn.hidden = true;
+  }
+
+  async function api(path, opts) {
+    const r = await fetch(API + path, opts);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    return j;
+  }
+
+  async function refresh() {
+    try {
+      const [sec, env] = await Promise.all([api('/api/list'), api('/api/env/list')]);
+      data = (sec.entries || []).map(d => ({ ...d, value: '' }));
+      envData = (env.entries || []).slice();
+      const names = data.map(d => d.name);
+      if (names.length) {
+        const vals = await Promise.all(names.map(n => api('/api/get?name=' + encodeURIComponent(n))));
+        vals.forEach((v, i) => { data[i].value = v.value; data[i].details = v.details || ''; });
+      }
+      tabCountSecrets.textContent = data.length;
+      tabCountEnv.textContent = envData.length;
+      render();
+      setConnState('ok');
+    } catch (e) {
+      setConnState('err');
+      notify('Failed to load vault: ' + esc(e.message), 'err');
+    }
+  }
+
+  function render() {
+    const term = filter.toLowerCase();
+    if (currentTab === 'secrets') {
+      const rows = data.filter(d => d.name.toLowerCase().includes(term));
+      setStat(rows.length, rows.length === 1 ? 'secret' : 'secrets');
+      footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' · ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      if (!rows.length) {
+        list.innerHTML = emptyState('lock', 'Nothing locked away yet.', 'Add your first secret with the <strong>New secret</strong> button above.');
+      } else {
+        list.innerHTML = rows.map((d, i) => `
+          <li data-name="${esc(d.name)}" style="animation-delay:${i * 50}ms;">
+            <span class="idx">${String(i + 1).padStart(2, '0')}</span>
+            <span class="meta">
+              <span class="name">${esc(d.name)}</span>
+              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? '…' : ''}</span>
+              ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? '…' : ''}</span>` : ''}
+            </span>
+            <span class="badge">secret</span>
+            <span class="icons">
+              <button class="icon-btn" data-act="copy" title="Copy value" aria-label="Copy value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              </button>
+              <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button class="icon-btn danger" data-act="del" title="Delete" aria-label="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+              </button>
+            </span>
+          </li>`).join('');
+      }
+    } else {
+      const rows = envData.filter(d => d.key.toLowerCase().includes(term));
+      setStat(rows.length, rows.length === 1 ? 'env var' : 'env vars');
+      footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' · ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
+      if (!rows.length) {
+        envList.innerHTML = emptyState('env', 'No environment variables yet.', 'Add your first env var with the <strong>New env var</strong> button above.');
+      } else {
+        envList.innerHTML = rows.map((d, i) => {
+          const valDisplay = d.secret
+            ? `<span class="env-val masked">${esc(maskValue(d.value))}</span>`
+            : (d.value
+                ? `<span class="env-val">${esc(d.value).slice(0, 64)}${d.value.length > 64 ? '…' : ''}</span>`
+                : `<span class="env-val empty">(empty)</span>`);
+          return `
+          <li class="env-row" data-key="${esc(d.key)}" style="animation-delay:${i * 50}ms;">
+            <span class="idx">${String(i + 1).padStart(2, '0')}</span>
+            <span class="env-key">${esc(d.key)}</span>
+            <span class="env-val-wrap">
+              <span class="env-eq">=</span>
+              ${valDisplay}
+            </span>
+            ${d.secret ? '<span class="badge-secret">secret</span>' : '<span class="badge-public">public</span>'}
+            <span class="icons">
+              <button class="icon-btn" data-act="copy" title="Copy value" aria-label="Copy value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              </button>
+              <button class="icon-btn" data-act="reveal" title="Reveal value" aria-label="Reveal value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button class="icon-btn danger" data-act="del" title="Delete" aria-label="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+              </button>
+            </span>
+          </li>`;
+        }).join('');
+      }
+    }
+  }
+  function emptyState(kind, message, hint) {
+    const ic = kind === 'env'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    return `<li class="empty" style="display:flex;list-style:none;">
+      <span class="lock-ic">${ic}</span>
+      <p>${message}</p>
+      <p class="hint">${hint}</p>
+      <div class="prompt-line"><span>$</span><span class="c"></span></div>
+    </li>`;
+  }
+
+  async function copyVal(name, isEnv) {
+    let value;
+    if (isEnv) {
+      const d = envData.find(x => x.key === name);
+      if (!d) return;
+      value = d.value || '';
+    } else {
+      const d = data.find(x => x.name === name);
+      if (!d) return;
+      value = d.value || '';
+    }
+    try {
+      await navigator.clipboard.writeText(value);
+      notify(`Copied <code>${esc(name)}</code> to clipboard`);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = value;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); notify(`Copied <code>${esc(name)}</code> to clipboard`); }
+      catch { notify('Copy failed. Reveal the value manually.', 'err'); }
+      ta.remove();
+    }
+  }
+
+  let envRevealTimers = new Map();
+  function toggleEnvReveal(key, btn) {
+    const li = btn.closest('li[data-key]');
+    if (!li) return;
+    const d = envData.find(x => x.key === key);
+    if (!d) return;
+    const valEl = li.querySelector('.env-val');
+    if (!valEl) return;
+    if (valEl.classList.contains('masked')) {
+      valEl.classList.remove('masked');
+      valEl.textContent = d.value || '(empty)';
+      btn.style.color = 'var(--accent)';
+      if (envRevealTimers.has(key)) clearTimeout(envRevealTimers.get(key));
+      const t = setTimeout(() => {
+        valEl.classList.add('masked');
+        valEl.textContent = maskValue(d.value);
+        btn.style.color = '';
+        envRevealTimers.delete(key);
+      }, 4000);
+      envRevealTimers.set(key, t);
+    } else {
+      valEl.classList.add('masked');
+      valEl.textContent = maskValue(d.value);
+      btn.style.color = '';
+      if (envRevealTimers.has(key)) { clearTimeout(envRevealTimers.get(key)); envRevealTimers.delete(key); }
+    }
+  }
+
+  list.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const li = btn.closest('li[data-name]');
+    if (!li) return;
+    const name = li.dataset.name, act = btn.dataset.act;
+    if (act === 'edit') { openEditor(name); return; }
+    if (act === 'copy') { copyVal(name, false); return; }
+    if (act === 'del') { showConfirm(name, 'secret'); return; }
+  });
+  envList.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const li = btn.closest('li[data-key]');
+    if (!li) return;
+    const key = li.dataset.key, act = btn.dataset.act;
+    if (act === 'edit') { openEnvEditor(key); return; }
+    if (act === 'copy') { copyVal(key, true); return; }
+    if (act === 'reveal') { toggleEnvReveal(key, btn); return; }
+    if (act === 'del') { showConfirm(key, 'env'); return; }
+  });
+
+  confirmCancel.addEventListener('click', hideConfirm);
+  confirmDelete.addEventListener('click', async () => {
+    if (!pendingDelete) return;
+    const { name, kind } = pendingDelete;
+    hideConfirm();
+    // backup for undo
+    let backup = null;
+    if (kind === 'env') {
+      const d = envData.find(x => x.key === name);
+      if (d) backup = { kind: 'env', key: d.key, value: d.value, secret: d.secret };
+    } else {
+      const d = data.find(x => x.name === name);
+      if (d) backup = { kind: 'secret', name: d.name, value: d.value, details: d.details || '' };
+    }
+    try {
+      if (kind === 'env') {
+        await api('/api/env/delete?key=' + encodeURIComponent(name), { method: 'POST' });
+        if (envEditing === name) closeEnvEditor();
+      } else {
+        await api('/api/delete?name=' + encodeURIComponent(name), { method: 'POST' });
+        if (editing === name) closeEditor();
+      }
+      const undoId = 'undo_' + Date.now();
+      notify(`Deleted <code>${esc(name)}</code>`, 'ok', {
+        undo: backup ? () => restoreBackup(backup) : null,
+        undoId
+      });
+      await refresh();
+    } catch (e) {
+      notify('Delete failed: ' + esc(e.message), 'err');
+    }
+  });
+  async function restoreBackup(b) {
+    try {
+      if (b.kind === 'env') {
+        await api('/api/env/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: b.key, value: b.value, secret: b.secret })
+        });
+      } else {
+        await api('/api/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: b.name, value: b.value, details: b.details })
+        });
+      }
+      notify(`Restored <code>${esc(b.kind === 'env' ? b.key : b.name)}</code>`);
+      await refresh();
+    } catch (e) {
+      notify('Restore failed: ' + esc(e.message), 'err');
+    }
+  }
+  confirmModal.addEventListener('click', (ev) => {
+    if (ev.target === confirmModal) hideConfirm();
+  });
+
+  // help modal
+  helpBtn.addEventListener('click', () => helpModal.classList.add('open'));
+  helpClose.addEventListener('click', () => helpModal.classList.remove('open'));
+  helpModal.addEventListener('click', (ev) => {
+    if (ev.target === helpModal) helpModal.classList.remove('open');
+  });
+
+  $('#newBtn').addEventListener('click', () => {
+    if (currentTab === 'secrets') openEditor(null);
+    else openEnvEditor(null);
+  });
+  $('#editClose').addEventListener('click', closeEditor);
+  $('#cancelBtn').addEventListener('click', closeEditor);
+  delBtn.addEventListener('click', () => { if (editing) showConfirm(editing, 'secret'); });
+  $('#envEditClose').addEventListener('click', closeEnvEditor);
+  $('#envCancelBtn').addEventListener('click', closeEnvEditor);
+  envDelBtn.addEventListener('click', () => { if (envEditing) showConfirm(envEditing, 'env'); });
+
+  $('#editForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const name = fName.value.trim(), value = fVal.value;
+    if (!name) { notify('Name is required', 'err'); return; }
+    saveBtn.classList.add('btn-busy');
+    try {
+      await api('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, value, details: fDet.value })
+      });
+      notify(editing ? `Saved <code>${esc(name)}</code>` : `Added <code>${esc(name)}</code>`);
+      closeEditor();
+      await refresh();
+    } catch (e) {
+      notify('Save failed: ' + esc(e.message), 'err');
+    } finally {
+      saveBtn.classList.remove('btn-busy');
+    }
+  });
+
+  $('#envEditForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    let key = fKey.value.trim();
+    const value = fEnvVal.value;
+    if (!key) { notify('Key is required', 'err'); return; }
+    key = key.toUpperCase();
+    envSaveBtn.classList.add('btn-busy');
+    try {
+      await api('/api/env/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value, secret: fSecret.checked })
+      });
+      notify(envEditing ? `Saved <code>${esc(key)}</code>` : `Added <code>${esc(key)}</code>`);
+      closeEnvEditor();
+      await refresh();
+    } catch (e) {
+      notify('Save failed: ' + esc(e.message), 'err');
+    } finally {
+      envSaveBtn.classList.remove('btn-busy');
+    }
+  });
+
+  fReveal.addEventListener('click', () => {
+    const on = fReveal.dataset.on === '1';
+    fVal.type = on ? 'password' : 'text';
+    fReveal.dataset.on = on ? '' : '1';
+  });
+  fEnvReveal.addEventListener('click', () => {
+    const on = fEnvReveal.dataset.on === '1';
+    fEnvVal.type = on ? 'password' : 'text';
+    fEnvReveal.dataset.on = on ? '' : '1';
+  });
+
+  fKey.addEventListener('input', () => {
+    const pos = fKey.selectionStart;
+    fKey.value = fKey.value.toUpperCase();
+    fKey.setSelectionRange(pos, pos);
+  });
+
+  // export .env
+  exportEnvBtn.addEventListener('click', () => {
+    window.location.href = API + '/api/env/export';
+  });
+  // import .env
+  importEnvBtn.addEventListener('click', () => envFileInput.click());
+  envFileInput.addEventListener('change', async () => {
+    const file = envFileInput.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const res = await fetch(API + '/api/env/import', {
+        method: 'POST',
+        body: text
+      });
+      const j = await res.json();
+      notify(`Imported <code>${j.imported || 0}</code> env vars`);
+      await refresh();
+    } catch (e) {
+      notify('Import failed: ' + esc(e.message), 'err');
+    }
+    envFileInput.value = '';
+  });
+
+  q.addEventListener('input', () => { filter = q.value.trim(); render(); });
+  document.addEventListener('keydown', (ev) => {
+    // ? opens help (when not in input)
+    if (ev.key === '?' && !isInInput()) {
+      ev.preventDefault();
+      helpModal.classList.add('open');
+      return;
+    }
+    // 1/2 switch tabs (when not in input)
+    if (!isInInput() && !anyModalOpen()) {
+      if (ev.key === '1') { switchTab('secrets'); return; }
+      if (ev.key === '2') { switchTab('env'); return; }
+      if (ev.key.toLowerCase() === 'n' && currentTab === 'secrets') { ev.preventDefault(); openEditor(null); return; }
+      if (ev.key.toLowerCase() === 'e' && currentTab === 'env') { ev.preventDefault(); openEnvEditor(null); return; }
+      if (ev.key.toLowerCase() === 'r') { ev.preventDefault(); refresh(); return; }
+    }
+    // Ctrl/Cmd+K opens command palette (works even in inputs)
+    if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'k' || ev.key === 'K')) {
+      ev.preventDefault();
+      if (cmdBackdrop.classList.contains('open')) closeCmdPalette();
+      else openCmdPalette();
+      return;
+    }
+    if (ev.key === '/' && !isInInput() && !anyModalOpen()) {
+      ev.preventDefault(); q.focus();
+    }
+    if (ev.key === 'Escape') {
+      if (cmdBackdrop.classList.contains('open')) { closeCmdPalette(); return; }
+      if (helpModal.classList.contains('open')) { helpModal.classList.remove('open'); return; }
+      if (confirmModal.classList.contains('open')) { hideConfirm(); return; }
+      if (envEditor.classList.contains('open')) { closeEnvEditor(); return; }
+      if (editor.classList.contains('open')) { closeEditor(); return; }
+    }
+    if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
+      if (editor.classList.contains('open')) { ev.preventDefault(); $('#editForm').requestSubmit(); return; }
+      if (envEditor.classList.contains('open')) { ev.preventDefault(); $('#envEditForm').requestSubmit(); return; }
+    }
+  });
+  function isInInput() {
+    const el = document.activeElement;
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  }
+  function anyModalOpen() {
+    return editor.classList.contains('open') || envEditor.classList.contains('open') ||
+      confirmModal.classList.contains('open') || helpModal.classList.contains('open') ||
+      cmdBackdrop.classList.contains('open');
+  }
+
+  /* ---------- live connection status indicator ---------- */
+  function setConnState(state) {
+    // state: 'ok' | 'warn' | 'err'
+    if (sysLed) {
+      sysLed.dataset.state = state;
+    }
+    if (sysOnline) {
+      sysOnline.dataset.state = state;
+      sysOnline.textContent = state === 'ok' ? 'ONLINE' : state === 'warn' ? 'RETRY' : 'OFFLINE';
+    }
+  }
+
+  /* ---------- command palette ---------- */
+  let cmdSelected = -1;
+  let cmdItems = [];
+
+  function openCmdPalette() {
+    cmdBackdrop.classList.add('open');
+    setTimeout(() => cmdInput.focus(), 100);
+    cmdInput.value = '';
+    renderCmdResults('');
+  }
+  function closeCmdPalette() {
+    cmdBackdrop.classList.remove('open');
+    cmdInput.value = '';
+    cmdSelected = -1;
+  }
+  function fuzzyMatch(haystack, needle) {
+    if (!needle) return true;
+    needle = needle.toLowerCase();
+    let i = 0;
+    for (const ch of haystack.toLowerCase()) {
+      if (ch === needle[i]) i++;
+      if (i >= needle.length) return true;
+    }
+    return i >= needle.length;
+  }
+  function buildCmdItems() {
+    const items = [];
+    // actions
+    items.push({ type: 'action', label: 'New secret', cat: 'action', icon: 'plus', run: () => { switchTab('secrets'); openEditor(null); } });
+    items.push({ type: 'action', label: 'New env var', cat: 'action', icon: 'plus', run: () => { switchTab('env'); openEnvEditor(null); } });
+    items.push({ type: 'action', label: 'Switch to Secrets tab', cat: 'action', icon: 'tab', run: () => switchTab('secrets') });
+    items.push({ type: 'action', label: 'Switch to Env Vars tab', cat: 'action', icon: 'tab', run: () => switchTab('env') });
+    items.push({ type: 'action', label: 'Export env vars as .env', cat: 'action', icon: 'download', run: () => { switchTab('env'); window.location.href = API + '/api/env/export'; } });
+    items.push({ type: 'action', label: 'Import env vars from .env', cat: 'action', icon: 'upload', run: () => { switchTab('env'); envFileInput.click(); } });
+    items.push({ type: 'action', label: 'Manual refresh', cat: 'action', icon: 'refresh', run: () => refresh() });
+    items.push({ type: 'action', label: 'Show keyboard shortcuts', cat: 'action', icon: 'help', run: () => helpModal.classList.add('open') });
+    // secrets
+    for (const d of data) {
+      items.push({ type: 'secret', label: d.name, cat: 'secret', icon: 'lock', run: () => { switchTab('secrets'); openEditor(d.name); } });
+    }
+    // env vars
+    for (const d of envData) {
+      items.push({ type: 'env', label: d.key, cat: 'env', icon: 'var', run: () => { switchTab('env'); openEnvEditor(d.key); } });
+    }
+    return items;
+  }
+  function cmdIconSvg(name) {
+    const icons = {
+      plus: '<path d="M12 5v14M5 12h14"/>',
+      tab: '<path d="M3 3h18v18H3z" stroke="none" fill="none"/><path d="M3 6h18M3 12h18M3 18h18"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
+      upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
+      refresh: '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9A9 9 0 0 1 18.36 5.64L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+      help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+      var: '<path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/>'
+    };
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (icons[name] || icons.var) + '</svg>';
+  }
+  function renderCmdResults(query) {
+    cmdItems = buildCmdItems().filter(it => fuzzyMatch(it.label, query));
+    if (!cmdItems.length) {
+      cmdResults.innerHTML = '<li class="cmd-empty">No results<span class="c"></span></li>';
+      cmdSelected = -1;
+      return;
+    }
+    // group by category
+    const groups = { action: [], secret: [], env: [] };
+    for (const it of cmdItems) groups[it.type].push(it);
+    let html = '';
+    let idx = 0;
+    const groupOrder = [
+      { key: 'action', label: 'Actions' },
+      { key: 'secret', label: 'Secrets' },
+      { key: 'env', label: 'Env Vars' }
+    ];
+    for (const g of groupOrder) {
+      if (!groups[g.key].length) continue;
+      html += `<li class="cmd-group">${g.label}</li>`;
+      for (const it of groups[g.key]) {
+        const catLabel = g.key === 'action' ? 'action' : (g.key === 'secret' ? 'secret' : 'env var');
+        html += `<li class="cmd-item" data-idx="${idx}" role="option">
+          <span class="cmd-ic">${cmdIconSvg(it.icon)}</span>
+          <span class="cmd-label">${esc(it.label)}</span>
+          <span class="cmd-cat">${catLabel}</span>
+        </li>`;
+        idx++;
+      }
+    }
+    cmdResults.innerHTML = html;
+    cmdSelected = 0;
+    updateCmdSelected();
+    // wire up clicks
+    cmdResults.querySelectorAll('.cmd-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const i = parseInt(el.dataset.idx, 10);
+        if (cmdItems[i]) {
+          cmdItems[i].run();
+          closeCmdPalette();
+        }
+      });
+      el.addEventListener('mouseenter', () => {
+        cmdSelected = parseInt(el.dataset.idx, 10);
+        updateCmdSelected();
+      });
+    });
+  }
+  function updateCmdSelected() {
+    cmdResults.querySelectorAll('.cmd-item').forEach(el => {
+      const i = parseInt(el.dataset.idx, 10);
+      el.classList.toggle('selected', i === cmdSelected);
+    });
+    // scroll selected into view
+    const sel = cmdResults.querySelector('.cmd-item.selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  }
+  function execCmdSelected() {
+    if (cmdSelected >= 0 && cmdItems[cmdSelected]) {
+      cmdItems[cmdSelected].run();
+      closeCmdPalette();
+    }
+  }
+  cmdInput.addEventListener('input', () => renderCmdResults(cmdInput.value.trim()));
+  cmdInput.addEventListener('keydown', (ev) => {
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); cmdSelected = Math.min(cmdSelected + 1, cmdItems.length - 1); updateCmdSelected(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); cmdSelected = Math.max(cmdSelected - 1, 0); updateCmdSelected(); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); execCmdSelected(); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); closeCmdPalette(); }
+  });
+  cmdBackdrop.addEventListener('click', (ev) => {
+    if (ev.target === cmdBackdrop) closeCmdPalette();
+  });
+
+
+  (function loop() {
+    refresh().finally(() => setTimeout(loop, 4000));
+  })();
+
+  setTimeout(positionTabIndicator, 100);
+  window.addEventListener('resize', positionTabIndicator);
+
+  let raf = null;
+  document.addEventListener('mousemove', (e) => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      document.documentElement.style.setProperty('--mx', e.clientX + 'px');
+      document.documentElement.style.setProperty('--my', e.clientY + 'px');
+      raf = null;
+    });
+  });
+
+  (function matrix() {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    const cv = document.getElementById('matrix-canvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    let w, h, cols, drops, speeds;
+    const CHARS = '01ｱｲｳｴｵｶｷｸｹｺ#@$%&*<>=+/{\\}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const FONT = '14px "Share Tech Mono", monospace';
+    const CELL = 18;
+    function resize() {
+      w = cv.width = window.innerWidth;
+      h = cv.height = window.innerHeight;
+      cols = Math.floor(w / CELL);
+      drops = new Array(cols).fill(0).map(() => Math.random() * -h);
+      speeds = new Array(cols).fill(0).map(() => 10 + Math.random() * 14);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    let last = 0;
+    function frame(t) {
+      if (t - last < 50) { requestAnimationFrame(frame); return; }
+      last = t;
+      ctx.fillStyle = 'rgba(5, 6, 8, 0.08)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = FONT;
+      for (let i = 0; i < cols; i++) {
+        const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+        const x = i * CELL;
+        const y = drops[i];
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.5)';
+        ctx.fillText(ch, x, y);
+        if (y < h) {
+          ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
+          ctx.shadowColor = 'rgba(52, 211, 153, 0.7)';
+          ctx.shadowBlur = 8;
+          ctx.fillText(ch, x, y);
+          ctx.shadowBlur = 0;
+        }
+        if (y > h && Math.random() > 0.975) drops[i] = -CELL;
+        drops[i] += speeds[i];
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+})();
+</script>
+</body>
+</html>
