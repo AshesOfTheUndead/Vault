@@ -344,7 +344,9 @@
 
   .search {
     display: flex; align-items: center; gap: 6px; padding: 0 12px;
-    background: rgba(2, 6, 8, 0.65);
+    background: rgba(4, 8, 10, 0.85);
+    backdrop-filter: blur(14px) saturate(1.35);
+    -webkit-backdrop-filter: blur(14px) saturate(1.35);
     border: 1px solid var(--line);
     border-radius: var(--r);
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
@@ -353,9 +355,9 @@
   }
   .search::before { content: '$'; color: var(--accent-lo); font-family: var(--mono); font-weight: 600; font-size: 13px; }
   .search:focus-within {
-    border-color: var(--line-bright);
-    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14), inset 0 0 18px rgba(52, 211, 153, 0.07);
-    background: rgba(2, 6, 8, 0.85);
+    border-color: rgba(52, 211, 153, 0.6);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.16), 0 0 22px rgba(52, 211, 153, 0.22), inset 0 0 24px rgba(52, 211, 153, 0.08);
+    background: rgba(6, 12, 15, 0.95);
   }
   .search svg { width: 13px; height: 13px; stroke: var(--ink-3); flex: none; opacity: 0.7; }
   .search input {
@@ -367,7 +369,7 @@
   .search .kbd {
     font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
     border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(8, 14, 17, 0.92);
   }
 
   .btn {
@@ -420,9 +422,10 @@
     box-shadow: 0 0 28px rgba(251, 113, 133, 0.36);
     transform: translateY(-1px);
   }
-  .btn:focus-visible, .search input:focus-visible, .icon-btn:focus-visible, input:focus-visible, textarea:focus-visible, .tab:focus-visible {
+  .btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, textarea:focus-visible, .tab:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
+  .search input:focus-visible { outline: none; }
 
   .editor {
     display: grid; grid-template-rows: 0fr;
@@ -1037,7 +1040,7 @@
       </div>
       <p class="tag">
         <span class="dot" aria-hidden="true"></span>
-        Your secrets and env vars, kept in plain sight. Stored locally as plaintext files. Run <code>vault.exe</code> to launch.
+        Your secrets and env vars, kept in plain sight. Stored locally as plaintext files.
       </p>
     </div>
     <div class="sys-chip" aria-hidden="true">
