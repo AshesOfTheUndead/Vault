@@ -1,91 +1,97 @@
 # 🔐 VAULT
 
-> Secure local secrets and environment variables, kept in plain sight.
-> A single self-contained binary. No runtime. No cloud. Just plaintext files on your machine.
+> A tiny local app that keeps your secrets and environment variables in plain sight.
+> One binary, no runtime, no cloud, no database. Everything is just plaintext files on your machine.
 
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00add8?logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
 
+**What it does**: stores two kinds of things for you - **Secrets** (passwords, tokens, API keys) and **Env Vars** (key/value pairs with a secret toggle). You manage them in a browser UI at `http://127.0.0.1:7575`, or straight from a terminal with `curl`. Terminal AIs can read it too, which is the whole point: no auth gate, no token to configure.
+
 ---
 
 ## ✨ Features
 
-- **Single binary** - Go binary with embedded HTML, no runtime dependencies
+- **Single binary** - one executable with the UI embedded. No install, no dependencies
+- **Terminal-first** - every action works over plain HTTP, so `curl` and terminal AIs can read and write without the UI
 - **Origin/Host check** - blocks cross-origin browser requests (the real attack against a localhost app); terminal AIs and curl keep working
 - **Strict security headers** - CSP, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-XSS-Protection`
 - **HTTP server timeouts** - Read/Write 30s, Idle 120s, MaxHeaderBytes 1MB (slowloris-resistant)
-- **Port takeover** - if port 7575 is in use, vault finds the process, kills it, and takes over
+- **Port takeover** - if port 7575 is already in use, vault finds the process, kills it, and takes over
 - **Auto-open browser** - launches your default browser 800ms after startup
-- **Command palette** (Ctrl+K / Cmd+K) - fuzzy search across secrets, env vars, and actions; arrow-key navigation
-- **Live connection status indicator** - sys-chip LED turns green/amber/red based on API health
+- **Command palette** (Ctrl+K / Cmd+K) - fuzzy search across secrets, env vars, and actions
+- **Live connection indicator** - the SYS LED turns green/amber/red based on API health
 - **Two storage types**:
   - **Secrets** - personal entries (name + value + details) for passwords, tokens, API keys
   - **Env Vars** - Render-style environment variables with key/value/secret toggle
-- **Glass morphism UI** - premium dark hacker-terminal aesthetic with matrix rain, scanlines, and CRT vignette
-- **Smooth animations** - letter-by-letter brand reveal, count-up stats, staggered row entrances, smooth tab transitions
-- **Delete confirmation modal** - no accidental deletes
-- **Undo delete** - 5-second undo window via toast action button
-- **Keyboard shortcuts** - full keyboard navigation (`/`, `?`, `1`, `2`, `N`, `E`, `R`, `Ctrl+K`, `Ctrl+Enter`, `Esc`)
+- **Dark hacker-terminal UI** - glassmorphism, matrix rain, scanlines, CRT vignette
+- **Undo delete** - 5-second undo window after deleting
+- **Keyboard shortcuts** - `/`, `?`, `1`, `2`, `N`, `E`, `R`, `Ctrl+K`, `Ctrl+Enter`, `Esc`
 - **`.env` import/export** - bulk import env vars from `.env` files, export back to `.env`
-- **Auto-mark sensitive** - keys like `PASSWORD`, `TOKEN`, `API_KEY` are auto-marked as secret on import
+- **Auto-mark sensitive** - keys like `PASSWORD`, `TOKEN`, `API_KEY` are auto-marked secret on import
 - **Atomic file writes** - write to temp file then rename, prevents corruption
-- **Request logging** - colorized per-request log (method, path, status, duration)
+- **Diff-based auto-sync** - multi-tab sync via polling that only re-renders when something actually changed
 - **Graceful shutdown** - Ctrl+C cleanly shuts down the HTTP server
-- **Auto-migration** - upgrades old flat-file format to new folder structure on first run
-- **4-second auto-refresh** - multi-tab sync via polling
-- **Health, stats, and version endpoints** - `/api/health`, `/api/stats`, `/api/version`
 
 ---
 
 ## 🚀 Quick Start
 
-### Option A: Download the binary
+### Windows
 
 1. Download `vault.exe` from [Releases](../../releases)
-2. Double-click `vault.exe`
-3. Browser opens to `http://127.0.0.1:7575`
+2. Double-click it (Windows may show a SmartScreen warning - click **More info** then **Run anyway**)
+3. Your browser opens `http://127.0.0.1:7575` - you're in
 
-### Option B: Build from source
+### macOS / Linux
+
+Download the matching binary (`vault-darwin-arm64`, `vault-darwin-amd64` or `vault-linux-amd64`) or build from source:
 
 ```bash
-# requires Go 1.21+
 git clone https://github.com/AshesOfTheUndead/Vault.git
-cd vault
-
-# build for your current platform
-go build -o vault .
-
-# build for Windows from any platform
-GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o vault.exe .
-
-# run
-./vault           # linux/mac
-vault.exe         # windows
+cd Vault
+go build -o vault .        # requires Go 1.21+
+./vault
 ```
 
-Or use the build scripts:
+### Where your data lives
 
-```bash
-./build.sh        # linux/mac
-build.bat         # windows
+Everything is stored as plaintext files under `~/Vault/`:
+
 ```
+~/Vault/
+├── Secrets/                    # personal secrets
+│   ├── github_token/
+│   │   ├── value.txt           # the secret value
+│   │   ├── details.txt         # optional notes
+│   │   └── name.txt            # original name (case-preserved)
+│   └── ...
+└── EnvVars/                    # environment variables
+    ├── DATABASE_URL/
+    │   ├── value.txt
+    │   ├── secret.txt          # "true" or "false"
+    │   └── key.txt
+    └── ...
+```
+
+Nothing is encrypted, by design. Delete a folder to delete an entry. You can edit the files directly and the UI will pick it up within seconds.
 
 ### CLI flags
 
 ```
-vault.exe -port 8080           # use a different port
-vault.exe -version              # print version
-vault.exe -no-browser           # don't auto-open browser
-vault.exe -host 0.0.0.0         # bind to all interfaces (phone/LAN access)
-vault.exe -lan                  # shorthand for -host 0.0.0.0
+vault.exe              # start on port 7575, opens browser
+vault.exe -port 8080   # use a different port
+vault.exe -no-browser  # don't auto-open the browser
+vault.exe -lan         # bind to all interfaces (phone/Termux access)
+vault.exe -host 0.0.0.0# same as -lan
+vault.exe -version     # print version and exit
 ```
 
 ### Access from your phone (Android / Termux)
 
-The vault binds to `127.0.0.1` only by default. To reach it from your phone
-on the same Wi-Fi network, start it in LAN mode:
+By default the vault only listens on `127.0.0.1`, so your phone can't reach it. Start it in LAN mode:
 
 ```bash
 vault.exe -lan
@@ -93,48 +99,15 @@ vault.exe -lan
 
 The startup banner prints your LAN URL(s), e.g. `http://192.168.1.5:7575`.
 
-- **Android browser**: open `http://192.168.1.5:7575` - the full UI works on
-  mobile (responsive layout, touch-friendly).
+- **Android browser**: open that URL - the full UI works on mobile
 - **Termux**: plain `curl` works with no extra setup:
 
 ```bash
 curl http://192.168.1.5:7575/api/health
 ```
 
-- First run may prompt Windows Firewall to allow inbound connections on the
-  port - click Allow.
-- Security in LAN mode is the same as localhost mode: cross-origin browser
-  requests are still blocked (a malicious page on your phone cannot reach the
-  vault), and unknown `Host` headers get `403`. There is no login though, so
-  keep it on a network you trust.
-- The LAN host is verified, not trusted blindly: only your machine's actual
-  interface IPs and hostname are accepted by the Host/Origin allowlist.
-
----
-
-## 📁 Storage Layout
-
-Everything lives under `~/Vault/` (i.e. `C:\Users\<you>\Vault\` on Windows):
-
-```
-~/Vault/
-├── Secrets/                    # personal secrets
-│   ├── roblox/
-│   │   ├── value.txt           # the secret value
-│   │   ├── details.txt         # optional notes
-│   │   └── name.txt            # original name (case-preserved)
-│   └── github_token/
-│       └── ...
-└── EnvVars/                    # environment variables
-    ├── DATABASE_URL/
-    │   ├── value.txt
-    │   ├── secret.txt          # "true" or "false"
-    │   └── key.txt
-    └── PORT/
-        └── ...
-```
-
-Nothing is encrypted - by design. Delete a folder to delete an entry. Edit files directly if you want.
+- On Windows, the first LAN run asks for a firewall rule - click **Allow**
+- Security stays the same in LAN mode: cross-origin requests and unknown hosts still get `403`. There is no login though, so only run `-lan` on a network you trust
 
 ---
 
@@ -157,7 +130,7 @@ Nothing is encrypted - by design. Delete a folder to delete an entry. Edit files
 
 ## 🔌 API Reference
 
-All endpoints are JSON over HTTP, listening on `127.0.0.1:7575`.
+All endpoints are JSON over HTTP on `127.0.0.1:7575`.
 
 ### Secrets
 
@@ -208,6 +181,73 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 
 ---
 
+## 🛠️ Troubleshooting
+
+### "The site can't be reached" / nothing loads in the browser
+
+1. Is the vault actually running? Check with:
+   ```bash
+   curl http://127.0.0.1:7575/api/health
+   ```
+   If you get a connection error, the vault isn't running. Start it (`vault.exe`) and retry.
+2. Are you on the right URL? It's `http://127.0.0.1:7575` (not `https`, not port 80).
+3. Browser caching an old page? Hard-refresh with `Ctrl+Shift+R`.
+
+### I get `403 Forbidden`
+
+This is the security middleware doing its job. It happens when the `Host` or `Origin` header isn't one of the addresses the vault serves:
+
+- **From a terminal (curl, AI)**: no `Origin` header is sent, so requests are always allowed. If you're seeing 403 from curl, you're sending a `Host` header that isn't your machine - stop overriding it.
+- **From a webpage**: a browser sends `Origin`. It must be the exact address you're browsing on (`http://127.0.0.1:7575` or the LAN URL shown in the banner). A page opened from `https://evil.com` will always get 403 - that's intended.
+- **From your phone in LAN mode**: make sure the vault was started with `-lan` **and** you're using the exact LAN URL from the banner. The allowlist only accepts your machine's real interface IPs.
+
+### My phone can't reach the vault (LAN mode)
+
+1. Start the vault with `-lan` and read the banner - use exactly the URL it prints.
+2. Make sure phone and PC are on the **same network** (same Wi-Fi, not mobile data).
+3. Windows Firewall: on the first `-lan` run you must click **Allow** on the prompt. If you missed it, allow inbound on TCP port 7575 manually:
+   ```bash
+   netsh advfirewall firewall add rule name="VAULT" dir=in action=allow program="C:\path\to\vault.exe"
+   ```
+   (run as Administrator)
+4. If your PC has both Wi-Fi and Ethernet, the phone must be on the same one as the IP you're using.
+5. The allowlist re-scans every 30 seconds, so if you just connected the network, wait a moment and retry.
+
+### Double-clicking `vault.exe` does nothing
+
+- Check the terminal: run `vault.exe` from a command prompt - any error prints there.
+- SmartScreen: click **More info** then **Run anyway** (the binary is not code-signed).
+- If the port is stuck from a previous run, vault should take it over automatically. If not, kill the old process: `taskkill /F /IM vault.exe`.
+- The first launch opens a browser after ~1 second. If it doesn't, open `http://127.0.0.1:7575` manually.
+
+### "Failed to load vault" shown in the UI
+
+The page loaded but the API calls failed. The server process may have crashed, or another program took port 7575. Restart `vault.exe` and refresh. The SYS LED goes red when the API is unreachable.
+
+### The UI looks old / characters look like "Ã¢â‚¬Â¦"
+
+Hard-refresh with `Ctrl+Shift+R` to bust the browser cache. The UI is served fresh on every load, but browsers sometimes keep the old page around.
+
+### Env var values look like garbage when exported as `.env`
+
+Values containing newlines, quotes, spaces or a leading `#` are quoted automatically on export - that's correct `.env` syntax, not a bug.
+
+### Where are my secrets? I want a backup
+
+Everything is plaintext under `~/Vault/`. **Do not sync that folder to cloud storage as-is** - encrypt it first:
+
+```bash
+tar czf - ~/Vault | gpg --symmetric --cipher-algo AES256 -o vault-backup.tar.gz.gpg
+```
+
+### I want a password/encryption on the vault
+
+It's not built in, on purpose: the vault exists so terminal AIs can read it without a token gate. If you need more:
+- **Multi-user / remote access**: add a bearer token + TLS in front
+- **Encryption at rest**: layer `gocryptfs` or `VeraCrypt` on top of `~/Vault/`
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -217,7 +257,7 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 │  │   vault.html (embedded via        │  │
 │  │   //go:embed directive)          │  │
 │  │   - single-file HTML/CSS/JS      │  │
-│  │   - glass morphism + matrix rain │  │
+│  │   - glassmorphism + matrix rain  │  │
 │  │   - vanilla JS, no build step    │  │
 │  └───────────────────────────────────┘  │
 │  ┌───────────────────────────────────┐  │
@@ -248,12 +288,13 @@ curl -X POST http://127.0.0.1:7575/api/env/import \
 ## 🛡️ Security
 
 ### Origin/Host check (CSRF protection)
-The server runs a security middleware that blocks **any cross-origin request** coming from a browser. This is the single real attack surface for a localhost app: a malicious webpage making `fetch("http://127.0.0.1:7575/api/delete?name=...")` to delete your vault.
+The server blocks **any cross-origin request** coming from a browser. This is the single real attack surface for a localhost app: a malicious webpage making `fetch("http://127.0.0.1:7575/api/delete?name=...")` to delete your vault.
 
-- If the `Origin` header is present, its host must be one of the hosts the server actually serves: loopback (`127.0.0.1`, `localhost`, `::1`) always, plus your machine's real interface IPs and hostname when running with `-lan`/`-host 0.0.0.0`. Anything else gets `403 Forbidden` - matching is case-insensitive and accepts both `host` and `host:port` forms
+- If the `Origin` header is present, its host must be one the server actually serves: loopback (`127.0.0.1`, `localhost`, `::1`) always, plus your machine's real interface IPs and hostname when running with `-lan`. Anything else gets `403 Forbidden` - matching is case-insensitive and accepts both `host` and `host:port` forms
 - The `Host` header is verified against the same allowlist (DNS-rebinding defense), so a request aimed at your LAN IP is only served if that IP is genuinely local
 - If `Origin` is absent (terminal AIs, curl, scripts), the request is allowed - terminal workflows keep working
 - `Referer` is also checked as a fallback for browsers that omit `Origin`
+- LAN IPs are re-scanned every 30 seconds, so NIC reconnects and DHCP renewals can't lock you out
 
 ```bash
 # terminal (no Origin header) - works
@@ -278,19 +319,8 @@ Every response includes:
 ### HTTP server timeouts
 Read/Write 30s, Idle 120s, ReadHeader 10s, MaxHeaderBytes 1MB - prevents slowloris-style resource exhaustion.
 
-### Why no tokens / encryption?
-The vault exists so your terminal AIs can read it directly. Locking it behind a token would break that workflow for marginal security gain on a localhost-only, single-user app. If you ever want a gate:
-- **For multi-user / remote access**: add a bearer token + TLS
-- **For real encryption at rest**: layer `gocryptfs` or `VeraCrypt` on top of `~/Vault/`
-
-### Backup hygiene
-**Do not sync `~/Vault/` to cloud storage in plaintext.** If you back it up, encrypt the backup first:
-```bash
-tar czf - ~/Vault | gpg --symmetric --cipher-algo AES256 -o vault-backup.tar.gz.gpg
-```
-
 ### Plaintext by design
-Stored values are plaintext on disk. The server binds to `127.0.0.1` only (no remote access). No authentication, no TLS.
+Values are plaintext on disk, and by default the server binds to `127.0.0.1` only (no remote access). With `-lan` it also listens on your network, with the same origin/host protections - but no authentication, so keep it on a trusted network.
 
 ---
 
@@ -301,7 +331,7 @@ PRs welcome. Keep it small and focused.
 ```bash
 # setup
 git clone https://github.com/AshesOfTheUndead/Vault.git
-cd vault
+cd Vault
 go build -o vault .
 
 # before submitting, make sure these pass:
