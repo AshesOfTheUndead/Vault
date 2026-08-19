@@ -1072,6 +1072,118 @@
     word-break: break-all;
   }
 
+  /* gateway cards + editor */
+  .gateway-card {
+    display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 13px 14px;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease-quint), box-shadow 0.3s var(--ease);
+    animation: rowIn 0.6s var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+  }
+  .gateway-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: transparent; transition: background 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .gateway-card:hover {
+    background: var(--surface-2); border-color: var(--line-bright);
+    box-shadow: 0 0 32px rgba(52, 211, 153, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+  }
+  .gateway-card:hover::before { background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+  .gateway-card .gw-idx {
+    font-family: var(--display); font-size: 20px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--accent-lo);
+    text-align: right; letter-spacing: -0.02em;
+    transition: color 0.3s var(--ease), text-shadow 0.3s var(--ease);
+  }
+  .gateway-card:hover .gw-idx { color: var(--accent); text-shadow: 0 0 14px var(--accent-glow); }
+  .gateway-card .gw-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .gateway-card .gw-name {
+    font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
+    display: flex; align-items: center; gap: 8px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .gateway-card .gw-name::before { content: '◆'; color: var(--accent-lo); font-weight: 400; font-size: 11px; }
+  .gateway-card .gw-type {
+    font-family: var(--term); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); background: rgba(52,211,153,0.08);
+    border: 1px solid var(--line-bright); border-radius: 3px;
+    padding: 1px 6px;
+  }
+  .gateway-card .gw-desc {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .gateway-card .gw-desc::before { content: '# '; color: var(--accent-lo); }
+  .gateway-card .gw-varcount {
+    font-family: var(--term); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--cyan); background: rgba(34,211,238,0.08);
+    border: 1px solid rgba(34,211,238,0.25); border-radius: 3px;
+    padding: 3px 8px;
+  }
+
+  /* gateway editor - dynamic key-value rows */
+  .gw-vars { display: grid; gap: 8px; }
+  .gw-var-row {
+    display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px;
+    align-items: center;
+    animation: rowIn 0.4s var(--ease-out) both;
+  }
+  .gw-var-row input {
+    width: 100%; padding: 9px 12px; border-radius: var(--r); outline: 0;
+    background: rgba(2, 6, 8, 0.75); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--mono); font-size: 12.5px; caret-color: var(--accent);
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .gw-var-row input:focus {
+    border-color: var(--line-bright);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14);
+  }
+  .gw-var-row input.gw-key { text-transform: uppercase; font-weight: 600; }
+  .gw-var-row .gw-secret-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--r);
+    background: rgba(2, 6, 8, 0.5); border: 1px solid var(--line);
+    cursor: pointer; color: var(--ink-3);
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .gw-var-row .gw-secret-toggle:hover { color: var(--amber); border-color: rgba(251,191,36,0.3); }
+  .gw-var-row .gw-secret-toggle[data-on="1"] {
+    color: var(--amber); border-color: rgba(251,191,36,0.4);
+    background: rgba(251,191,36,0.08);
+    box-shadow: 0 0 10px rgba(251,191,36,0.12);
+  }
+  .gw-var-row .gw-secret-toggle svg { width: 14px; height: 14px; }
+  .gw-var-row .gw-remove {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--r);
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-3); cursor: pointer;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .gw-var-row .gw-remove:hover { color: var(--danger); border-color: rgba(251,113,133,0.3); background: rgba(251,113,133,0.06); }
+  .gw-var-row .gw-remove svg { width: 14px; height: 14px; }
+  .gw-add-var {
+    padding: 9px 14px; border-radius: var(--r);
+    background: transparent; border: 1px dashed var(--line);
+    color: var(--ink-3); cursor: pointer;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+    justify-self: start;
+  }
+  .gw-add-var:hover { color: var(--accent); border-color: var(--line-bright); background: rgba(52,211,153,0.04); }
+
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb {
     background: rgba(52, 211, 153, 0.2); border-radius: 6px;
@@ -1269,7 +1381,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v3.2</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v4.0</span>
         </h1>
       </div>
       <p class="tag">
@@ -1306,6 +1418,10 @@
         <button class="tab" data-tab="env">
           <span>Env Vars</span>
           <span class="tab-count" id="tabCountEnv">0</span>
+        </button>
+        <button class="tab" data-tab="gateways">
+          <span>Gateways</span>
+          <span class="tab-count" id="tabCountGw">0</span>
         </button>
         <span class="tab-indicator" id="tabIndicator"></span>
       </div>
@@ -1451,6 +1567,52 @@
     </div>
   </section>
 
+  <!-- gateway editor -->
+  <section class="editor" id="gwEditor">
+    <div class="gate">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="path">~/vault/gateways<span class="sep">/</span><span class="leaf" id="gwEditPathLabel">new</span></span>
+          <span class="spacer"></span>
+          <span class="meta" id="gwEditWho"></span>
+          <button class="icon-btn" id="gwEditClose" title="Close (Esc)" aria-label="Close editor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <form class="form" id="gwEditForm">
+          <div class="field">
+            <label for="fGwName">Name</label>
+            <input id="fGwName" type="text" placeholder="stripe" autocomplete="off" spellcheck="false" required>
+          </div>
+          <div class="field">
+            <label for="fGwType">Type <span class="opt">optional</span></label>
+            <input id="fGwType" type="text" placeholder="payment / smtp / database" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="fGwDesc">Description <span class="opt">optional</span></label>
+            <input id="fGwDesc" type="text" placeholder="Stripe production keys" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label>Variables</label>
+            <div class="gw-vars" id="gwVars"></div>
+            <button type="button" class="gw-add-var" id="gwAddVar" style="margin-top:8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add variable
+            </button>
+          </div>
+          <div class="keys">Hint: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> save · <kbd>Esc</kbd> cancel</div>
+          <div class="actions">
+            <button type="button" class="btn btn-danger" id="gwDelBtn" hidden>Delete</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-ghost" id="gwCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="gwSaveBtn">Save gateway</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <div class="ledger panel">
     <div class="panel-title">
       <span class="dots"><i></i><i></i><i></i></span>
@@ -1472,6 +1634,11 @@
           <span class="recent-label">Recent</span>
         </div>
         <ul class="list" id="envList"></ul>
+      </div>
+    </div>
+    <div class="pane" id="paneGw" hidden>
+      <div class="pane-content">
+        <ul class="list" id="gwList"></ul>
       </div>
     </div>
   </div>
@@ -1523,8 +1690,10 @@
       <div class="row"><span class="desc">Focus search</span><span class="keys-cell"><kbd>/</kbd></span></div>
       <div class="row"><span class="desc">New secret (in secrets tab)</span><span class="keys-cell"><kbd>N</kbd></span></div>
       <div class="row"><span class="desc">New env var (in env tab)</span><span class="keys-cell"><kbd>E</kbd></span></div>
+      <div class="row"><span class="desc">New gateway (in gateways tab)</span><span class="keys-cell"><kbd>G</kbd></span></div>
       <div class="row"><span class="desc">Switch to Secrets tab</span><span class="keys-cell"><kbd>1</kbd></span></div>
       <div class="row"><span class="desc">Switch to Env Vars tab</span><span class="keys-cell"><kbd>2</kbd></span></div>
+      <div class="row"><span class="desc">Switch to Gateways tab</span><span class="keys-cell"><kbd>3</kbd></span></div>
       <div class="row"><span class="desc">Save current editor</span><span class="keys-cell"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span></div>
       <div class="row"><span class="desc">Close editor / modal</span><span class="keys-cell"><kbd>Esc</kbd></span></div>
       <div class="row"><span class="desc">Show this help</span><span class="keys-cell"><kbd>?</kbd></span></div>
@@ -1645,15 +1814,20 @@
   const fStrengthMeter = $('#fStrengthMeter'), fStrengthBar = $('#fStrengthBar'), fStrengthLabel = $('#fStrengthLabel'), fStrengthText = $('#fStrengthText');
   const fEnvStrengthMeter = $('#fEnvStrengthMeter'), fEnvStrengthBar = $('#fEnvStrengthBar'), fEnvStrengthLabel = $('#fEnvStrengthLabel'), fEnvStrengthText = $('#fEnvStrengthText');
   const tabs = $('#tabs'), tabIndicator = $('#tabIndicator');
-  const paneSecrets = $('#paneSecrets'), paneEnv = $('#paneEnv');
+  const paneSecrets = $('#paneSecrets'), paneEnv = $('#paneEnv'), paneGw = $('#paneGw');
   const panePath = $('#panePath'), newBtnLabel = $('#newBtnLabel');
-  const tabCountSecrets = $('#tabCountSecrets'), tabCountEnv = $('#tabCountEnv');
+  const tabCountSecrets = $('#tabCountSecrets'), tabCountEnv = $('#tabCountEnv'), tabCountGw = $('#tabCountGw');
   const exportEnvBtn = $('#exportEnvBtn'), importEnvBtn = $('#importEnvBtn'), envFileInput = $('#envFileInput');
   const cmdBackdrop = $('#cmdBackdrop'), cmdInput = $('#cmdInput'), cmdResults = $('#cmdResults');
   const sysLed = document.querySelector('.sys-chip .led');
   const sysOnline = document.querySelector('.sys-chip .v'); // the ONLINE word
+  // gateway editor
+  const gwEditor = $('#gwEditor'), gwEditPathLabel = $('#gwEditPathLabel'), gwEditWho = $('#gwEditWho');
+  const fGwName = $('#fGwName'), fGwType = $('#fGwType'), fGwDesc = $('#fGwDesc'), gwVars = $('#gwVars');
+  const gwAddVar = $('#gwAddVar'), gwDelBtn = $('#gwDelBtn'), gwSaveBtn = $('#gwSaveBtn');
+  const gwList = $('#gwList');
 
-  let data = [], envData = [], editing = null, envEditing = null, filter = '', pendingDelete = null, currentTab = 'secrets';
+  let data = [], envData = [], gwData = [], editing = null, envEditing = null, gwEditing = null, filter = '', pendingDelete = null, currentTab = 'secrets';
   let lastCount = 0;
   let undoBuffer = null; // for delete undo
 
@@ -1847,16 +2021,20 @@
     currentTab = tab;
     tabs.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     positionTabIndicator();
-    const showSecrets = tab === 'secrets';
-    paneSecrets.hidden = !showSecrets;
-    paneEnv.hidden = showSecrets;
-    panePath.textContent = showSecrets ? 'secrets' : 'envvars';
-    newBtnLabel.textContent = showSecrets ? 'New secret' : 'New env var';
-    exportEnvBtn.hidden = showSecrets;
-    importEnvBtn.hidden = showSecrets;
+    paneSecrets.hidden = tab !== 'secrets';
+    paneEnv.hidden = tab !== 'env';
+    paneGw.hidden = tab !== 'gateways';
+    panePath.textContent = tab === 'secrets' ? 'secrets' : (tab === 'env' ? 'envvars' : 'gateways');
+    newBtnLabel.textContent = tab === 'secrets' ? 'New secret' : (tab === 'env' ? 'New env var' : 'New gateway');
+    exportEnvBtn.hidden = tab !== 'env';
+    importEnvBtn.hidden = tab !== 'env';
     if (envEditor.classList.contains('open')) closeEnvEditor();
     if (editor.classList.contains('open')) closeEditor();
-    const pane = showSecrets ? paneSecrets : paneEnv;
+    if (gwEditor.classList.contains('open')) closeGwEditor();
+    let pane;
+    if (tab === 'secrets') pane = paneSecrets;
+    else if (tab === 'env') pane = paneEnv;
+    else pane = paneGw;
     const content = pane.querySelector('.pane-content');
     content.style.animation = 'none';
     void content.offsetWidth;
@@ -1930,6 +2108,89 @@
     envDelBtn.hidden = true;
   }
 
+  /* ---------- gateway editor ---------- */
+  const GW_LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const GW_UNLOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/></svg>';
+  const GW_X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+  function gwAddVarRow(key = '', value = '', secret = false) {
+    const row = document.createElement('div');
+    row.className = 'gw-var-row';
+    row.innerHTML = `
+      <input type="text" class="gw-key" placeholder="KEY" value="${esc(key)}" autocomplete="off" spellcheck="false">
+      <input type="text" class="gw-val" placeholder="value" value="${esc(value)}" autocomplete="off" spellcheck="false">
+      <button type="button" class="gw-secret-toggle" data-on="${secret ? 1 : 0}" title="Toggle secret">${secret ? GW_LOCK_SVG : GW_UNLOCK_SVG}</button>
+      <button type="button" class="gw-remove" title="Remove variable">${GW_X_SVG}</button>
+    `;
+    // auto-uppercase key
+    row.querySelector('.gw-key').addEventListener('input', function() {
+      const p = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(p, p);
+    });
+    // toggle secret
+    row.querySelector('.gw-secret-toggle').addEventListener('click', function() {
+      const on = this.dataset.on === '1';
+      this.dataset.on = on ? '0' : '1';
+      this.innerHTML = on ? GW_UNLOCK_SVG : GW_LOCK_SVG;
+    });
+    // remove row
+    row.querySelector('.gw-remove').addEventListener('click', () => {
+      row.style.animation = 'none';
+      row.remove();
+    });
+    gwVars.appendChild(row);
+    return row;
+  }
+  function gwReadVars() {
+    const out = [];
+    gwVars.querySelectorAll('.gw-var-row').forEach(row => {
+      const key = row.querySelector('.gw-key').value.trim();
+      const value = row.querySelector('.gw-val').value;
+      const secret = row.querySelector('.gw-secret-toggle').dataset.on === '1';
+      if (key) out.push({ key, value, secret });
+    });
+    return out;
+  }
+  function openGwEditor(name) {
+    gwEditing = name || null;
+    gwEditPathLabel.textContent = name ? 'edit' : 'new';
+    gwEditWho.textContent = name ? ('> ' + name) : '> awaiting input…';
+    gwDelBtn.hidden = !name;
+    fGwName.value = name || '';
+    gwVars.innerHTML = '';
+    const d = name ? gwData.find(x => x.name === name) : null;
+    fGwType.value = d ? (d.type || '') : '';
+    fGwDesc.value = d ? (d.description || '') : '';
+    if (d && d.vars && d.vars.length) {
+      d.vars.forEach(v => gwAddVarRow(v.key, v.value, v.secret));
+    } else {
+      gwAddVarRow(); // start with one empty row
+    }
+    gwEditor.classList.add('open');
+    setTimeout(() => (name ? fGwDesc : fGwName).focus(), 120);
+  }
+  function closeGwEditor() {
+    gwEditor.classList.remove('open');
+    gwEditing = null;
+    fGwName.value = fGwType.value = fGwDesc.value = '';
+    gwVars.innerHTML = '';
+    gwDelBtn.hidden = true;
+  }
+  function gwCopyAsEnv(name) {
+    const d = gwData.find(x => x.name === name);
+    if (!d) return;
+    let text = '# gateway: ' + d.name + '\n';
+    if (d.description) text += '# ' + d.description + '\n';
+    text += '\n';
+    (d.vars || []).forEach(v => {
+      let val = v.value || '';
+      if (/[\n\r"# ]/.test(val)) val = JSON.stringify(val);
+      text += v.key + '=' + val + '\n';
+    });
+    copyText(text, name);
+  }
+
   async function api(path, opts) {
     const r = await fetch(API + path, opts);
     const j = await r.json().catch(() => ({}));
@@ -1939,9 +2200,9 @@
 
   async function refresh() {
     try {
-      const [sec, env] = await Promise.all([api('/api/list'), api('/api/env/list')]);
-      lastSig = sigOf(sec, env);
-      await loadData(sec, env);
+      const [sec, env, gw] = await Promise.all([api('/api/list'), api('/api/env/list'), api('/api/gateway/list')]);
+      lastSig = sigOf(sec, env, gw);
+      await loadData(sec, env, gw);
       render(false);
       setConnState('ok');
     } catch (e) {
@@ -1955,11 +2216,11 @@
   // re-fetches every secret value (N+1) on each tick
   async function sync() {
     try {
-      const [sec, env] = await Promise.all([api('/api/list'), api('/api/env/list')]);
-      const sig = sigOf(sec, env);
+      const [sec, env, gw] = await Promise.all([api('/api/list'), api('/api/env/list'), api('/api/gateway/list')]);
+      const sig = sigOf(sec, env, gw);
       if (sig !== lastSig) {
         lastSig = sig;
-        await loadData(sec, env);
+        await loadData(sec, env, gw);
         render(true);
       }
       setConnState('ok');
@@ -1970,24 +2231,27 @@
 
   let lastSig = '';
 
-  function sigOf(sec, env) {
+  function sigOf(sec, env, gw) {
     // secrets: use the entry mtime (updated) so value edits AND details edits
     // propagate to other tabs; size alone missed both
     const a = (sec.entries || []).map(d => d.name + '\u0001' + (d.updated || 0)).join('|');
     const b = (env.entries || []).map(d => d.key + '\u0001' + (d.secret ? 1 : 0) + '\u0001' + (d.value || '')).join('|');
-    return a + '#' + b;
+    const c = (gw.entries || []).map(d => d.name + '\u0001' + (d.updated || 0) + '\u0001' + (d.vars || []).length).join('|');
+    return a + '#' + b + '#' + c;
   }
 
-  async function loadData(sec, env) {
+  async function loadData(sec, env, gw) {
     const names = (sec.entries || []).map(d => d.name);
     data = (sec.entries || []).map(d => ({ ...d, value: '' }));
     envData = (env.entries || []).slice();
+    gwData = (gw.entries || []).slice();
     if (names.length) {
       const vals = await Promise.all(names.map(n => api('/api/get?name=' + encodeURIComponent(n))));
       vals.forEach((v, i) => { data[i].value = v.value; data[i].details = v.details || ''; });
     }
     tabCountSecrets.textContent = data.length;
     tabCountEnv.textContent = envData.length;
+    tabCountGw.textContent = gwData.length;
   }
 
   function render(quiet) {
@@ -2031,7 +2295,7 @@
             </span>
           </li>`).join('');
       }
-    } else {
+    } else if (currentTab === 'env') {
       const rows = envData.filter(d => {
       const termL = term;
       return d.key.toLowerCase().includes(termL) || (d.value || '').toLowerCase().includes(termL);
@@ -2064,6 +2328,43 @@
               </button>
               <button class="icon-btn" data-act="reveal" title="Show / hide value" aria-label="Show or hide value">
                 ${d.secret ? ICON_EYE_OFF : ICON_EYE}
+              </button>
+              <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              </button>
+              <button class="icon-btn danger" data-act="del" title="Delete" aria-label="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+              </button>
+            </span>
+          </li>`;
+        }).join('');
+      }
+    } else if (currentTab === 'gateways') {
+      const rows = gwData.filter(d => {
+        const termL = term;
+        return d.name.toLowerCase().includes(termL) || (d.type || '').toLowerCase().includes(termL) || (d.description || '').toLowerCase().includes(termL);
+      });
+      setStat(rows.length, rows.length === 1 ? 'gateway' : 'gateways');
+      footCount.textContent = gwData.length + ' gateway' + (gwData.length === 1 ? '' : 's') + ' · ' + fmtBytes(gwData.reduce((a, d) => a + JSON.stringify(d.vars || []).length, 0));
+      if (!rows.length) {
+        gwList.innerHTML = gwData.length
+          ? emptyState('env', 'No matches for your filter.', 'Clear the search box to see all gateways.')
+          : emptyState('env', 'No gateways yet.', 'Add your first gateway with the <strong>New gateway</strong> button above.');
+      } else {
+        gwList.innerHTML = rows.map((d, i) => {
+          const varCount = (d.vars || []).length;
+          const secretCount = (d.vars || []).filter(v => v.secret).length;
+          return `
+          <li class="gateway-card" data-name="${esc(d.name)}" ${quiet ? 'style="animation:none"' : `style="animation-delay:${i * 50}ms"`}>
+            <span class="gw-idx">${String(i + 1).padStart(2, '0')}</span>
+            <span class="gw-meta">
+              <span class="gw-name">${esc(d.name)}${d.type ? ` <span class="gw-type">${esc(d.type)}</span>` : ''}</span>
+              <span class="gw-desc">${d.description ? esc(d.description) : (varCount + ' variable' + (varCount === 1 ? '' : 's') + (secretCount ? ' · ' + secretCount + ' secret' : ''))}</span>
+            </span>
+            <span class="gw-varcount">${varCount} vars</span>
+            <span class="icons">
+              <button class="icon-btn" data-act="gwcopy" title="Copy as .env" aria-label="Copy as .env">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
               </button>
               <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -2122,6 +2423,29 @@
       clipboardTimer = setTimeout(clearClipboard, 30000);
       notify(`Copied <code>${esc(name)}</code> - clipboard clears in 30s`);
       copyFlash(btn);
+    }
+  }
+
+  // copyText: copy arbitrary text to clipboard with auto-clear + toast
+  async function copyText(text, label) {
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); copied = true; }
+      catch { notify('Copy failed.', 'err'); }
+      ta.remove();
+    }
+    if (copied) {
+      if (clipboardTimer) clearTimeout(clipboardTimer);
+      clipboardName = label || '';
+      clipboardTimer = setTimeout(clearClipboard, 30000);
+      notify(`Copied <code>${esc(label || 'value')}</code> - clipboard clears in 30s`);
     }
   }
 
@@ -2206,6 +2530,16 @@
     if (act === 'reveal') { toggleEnvReveal(key, btn); return; }
     if (act === 'del') { showConfirm(key, 'env'); return; }
   });
+  gwList.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const li = btn.closest('li[data-name]');
+    if (!li) return;
+    const name = li.dataset.name, act = btn.dataset.act;
+    if (act === 'edit') { openGwEditor(name); return; }
+    if (act === 'gwcopy') { gwCopyAsEnv(name); copyFlash(btn); return; }
+    if (act === 'del') { showConfirm(name, 'gateway'); return; }
+  });
 
   confirmCancel.addEventListener('click', hideConfirm);
   confirmDelete.addEventListener('click', async () => {
@@ -2217,6 +2551,9 @@
     if (kind === 'env') {
       const d = envData.find(x => x.key === name);
       if (d) backup = { kind: 'env', key: d.key, value: d.value, secret: d.secret };
+    } else if (kind === 'gateway') {
+      const d = gwData.find(x => x.name === name);
+      if (d) backup = { kind: 'gateway', name: d.name, type: d.type || '', description: d.description || '', vars: d.vars || [] };
     } else {
       const d = data.find(x => x.name === name);
       if (d) backup = { kind: 'secret', name: d.name, value: d.value, details: d.details || '' };
@@ -2225,6 +2562,9 @@
       if (kind === 'env') {
         await api('/api/env/delete?key=' + encodeURIComponent(name), { method: 'POST' });
         if (envEditing === name) closeEnvEditor();
+      } else if (kind === 'gateway') {
+        await api('/api/gateway/delete?name=' + encodeURIComponent(name), { method: 'POST' });
+        if (gwEditing === name) closeGwEditor();
       } else {
         await api('/api/delete?name=' + encodeURIComponent(name), { method: 'POST' });
         if (editing === name) closeEditor();
@@ -2245,6 +2585,11 @@
         await api('/api/env/save', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: b.key, value: b.value, secret: b.secret })
+        });
+      } else if (b.kind === 'gateway') {
+        await api('/api/gateway/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: b.name, type: b.type, description: b.description, vars: b.vars })
         });
       } else {
         await api('/api/save', {
@@ -2499,7 +2844,8 @@
 
   $('#newBtn').addEventListener('click', () => {
     if (currentTab === 'secrets') openEditor(null);
-    else openEnvEditor(null);
+    else if (currentTab === 'env') openEnvEditor(null);
+    else openGwEditor(null);
   });
   $('#editClose').addEventListener('click', closeEditor);
   $('#cancelBtn').addEventListener('click', closeEditor);
@@ -2507,6 +2853,32 @@
   $('#envEditClose').addEventListener('click', closeEnvEditor);
   $('#envCancelBtn').addEventListener('click', closeEnvEditor);
   envDelBtn.addEventListener('click', () => { if (envEditing) showConfirm(envEditing, 'env'); });
+  // gateway editor events
+  $('#gwEditClose').addEventListener('click', closeGwEditor);
+  $('#gwCancelBtn').addEventListener('click', closeGwEditor);
+  gwAddVar.addEventListener('click', () => gwAddVarRow());
+  gwDelBtn.addEventListener('click', () => { if (gwEditing) showConfirm(gwEditing, 'gateway'); });
+  $('#gwEditForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const name = fGwName.value.trim();
+    if (!name) { notify('Name is required', 'err'); return; }
+    const vars = gwReadVars();
+    gwSaveBtn.classList.add('btn-busy');
+    try {
+      await api('/api/gateway/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, type: fGwType.value.trim(), description: fGwDesc.value.trim(), vars })
+      });
+      notify(gwEditing ? `Saved gateway <code>${esc(name)}</code>` : `Added gateway <code>${esc(name)}</code>`);
+      closeGwEditor();
+      await refresh();
+    } catch (e) {
+      notify('Save failed: ' + esc(e.message), 'err');
+    } finally {
+      gwSaveBtn.classList.remove('btn-busy');
+    }
+  });
 
   $('#editForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -2640,8 +3012,10 @@
     if (!isInInput() && !anyModalOpen()) {
       if (ev.key === '1') { switchTab('secrets'); return; }
       if (ev.key === '2') { switchTab('env'); return; }
+      if (ev.key === '3') { switchTab('gateways'); return; }
       if (ev.key.toLowerCase() === 'n' && currentTab === 'secrets') { ev.preventDefault(); openEditor(null); return; }
       if (ev.key.toLowerCase() === 'e' && currentTab === 'env') { ev.preventDefault(); openEnvEditor(null); return; }
+      if (ev.key.toLowerCase() === 'g' && currentTab === 'gateways') { ev.preventDefault(); openGwEditor(null); return; }
       if (ev.key.toLowerCase() === 'r') { ev.preventDefault(); refresh(); return; }
     }
     // Ctrl/Cmd+K opens command palette (works even in inputs)
@@ -2660,12 +3034,14 @@
       if (helpModal.classList.contains('open')) { helpModal.classList.remove('open'); return; }
       if (aiModal.classList.contains('open')) { aiModal.classList.remove('open'); return; }
       if (confirmModal.classList.contains('open')) { hideConfirm(); return; }
+      if (gwEditor.classList.contains('open')) { closeGwEditor(); return; }
       if (envEditor.classList.contains('open')) { closeEnvEditor(); return; }
       if (editor.classList.contains('open')) { closeEditor(); return; }
     }
     if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
       if (editor.classList.contains('open')) { ev.preventDefault(); $('#editForm').requestSubmit(); return; }
       if (envEditor.classList.contains('open')) { ev.preventDefault(); $('#envEditForm').requestSubmit(); return; }
+      if (gwEditor.classList.contains('open')) { ev.preventDefault(); $('#gwEditForm').requestSubmit(); return; }
     }
   });
   function isInInput() {
@@ -2674,6 +3050,7 @@
   }
   function anyModalOpen() {
     return editor.classList.contains('open') || envEditor.classList.contains('open') ||
+      gwEditor.classList.contains('open') ||
       confirmModal.classList.contains('open') || helpModal.classList.contains('open') ||
       aiModal.classList.contains('open') || auditModal.classList.contains('open') ||
       cmdBackdrop.classList.contains('open');
@@ -2728,8 +3105,10 @@
     // actions
     items.push({ type: 'action', label: 'New secret', cat: 'action', icon: 'plus', run: () => { switchTab('secrets'); openEditor(null); } });
     items.push({ type: 'action', label: 'New env var', cat: 'action', icon: 'plus', run: () => { switchTab('env'); openEnvEditor(null); } });
+    items.push({ type: 'action', label: 'New gateway', cat: 'action', icon: 'plus', run: () => { switchTab('gateways'); openGwEditor(null); } });
     items.push({ type: 'action', label: 'Switch to Secrets tab', cat: 'action', icon: 'tab', run: () => switchTab('secrets') });
     items.push({ type: 'action', label: 'Switch to Env Vars tab', cat: 'action', icon: 'tab', run: () => switchTab('env') });
+    items.push({ type: 'action', label: 'Switch to Gateways tab', cat: 'action', icon: 'tab', run: () => switchTab('gateways') });
     items.push({ type: 'action', label: 'Export env vars as .env', cat: 'action', icon: 'download', run: () => { switchTab('env'); window.location.href = API + '/api/env/export'; } });
     items.push({ type: 'action', label: 'Import env vars from .env', cat: 'action', icon: 'upload', run: () => { switchTab('env'); envFileInput.click(); } });
     items.push({ type: 'action', label: 'Manual refresh', cat: 'action', icon: 'refresh', run: () => refresh() });
@@ -2742,6 +3121,10 @@
     // env vars
     for (const d of envData) {
       items.push({ type: 'env', label: d.key, cat: 'env', icon: 'var', run: () => { switchTab('env'); openEnvEditor(d.key); } });
+    }
+    // gateways
+    for (const d of gwData) {
+      items.push({ type: 'gateway', label: d.name, cat: 'gateway', icon: 'lock', run: () => { switchTab('gateways'); openGwEditor(d.name); } });
     }
     return items;
   }
