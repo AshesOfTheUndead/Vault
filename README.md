@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
-[![Version](https://img.shields.io/badge/version-4.0.0-34d399)](#)
+[![Version](https://img.shields.io/badge/version-4.0.1-34d399)](#)
 
 ---
 

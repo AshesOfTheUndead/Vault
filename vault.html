@@ -821,6 +821,8 @@
       0 30px 80px rgba(0, 0, 0, 0.7),
       0 0 80px rgba(52, 211, 153, 0.12);
     padding: 28px 28px 24px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
     transform: scale(0.92) translateY(12px); opacity: 0;
     transition: transform 0.4s var(--ease-quint), opacity 0.3s var(--ease);
     position: relative; overflow: hidden;
@@ -1333,7 +1335,7 @@
     display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
   }
   .ai-count { color: var(--ink-mute); font-weight: 400; letter-spacing: 0; }
-  .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
   .ai-token-id { font-family: var(--mono); font-size: 12px; color: var(--ink); letter-spacing: 0.06em; }
   .ai-token-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .ai-token-created { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); }
@@ -1605,6 +1607,10 @@
           <div class="actions">
             <button type="button" class="btn btn-danger" id="gwDelBtn" hidden>Delete</button>
             <div class="spacer"></div>
+            <button type="button" class="btn btn-ghost" id="gwGenBtn" title="Generate a random gateway">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:6px;"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9Z"/></svg>
+              Generate
+            </button>
             <button type="button" class="btn btn-ghost" id="gwCancelBtn">Cancel</button>
             <button type="submit" class="btn btn-primary" id="gwSaveBtn">Save gateway</button>
           </div>
@@ -1718,11 +1724,11 @@
       <p class="ai-tunnel-desc">Expose the vault to cloud AIs through a Cloudflare tunnel. Start it, copy the URL, and give it to your AI together with a token.</p>
       <div class="ai-tunnel-body" id="tunnelBody" hidden>
         <code class="ai-token" id="tunnelUrl"></code>
-        <button class="btn btn-ghost btn-sm" id="tunnelCopyUrl">Copy URL</button>
-        <button class="btn btn-ghost btn-sm" id="tunnelStop">Stop</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="tunnelCopyUrl">Copy URL</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="tunnelStop">Stop</button>
       </div>
       <div class="ai-tunnel-start" id="tunnelStartWrap" hidden>
-        <button class="btn btn-primary btn-sm" id="tunnelStart">Start tunnel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="tunnelStart">Start tunnel</button>
       </div>
     </div>
     <div class="ai-fresh" id="aiFresh" hidden>
@@ -1732,7 +1738,7 @@
       </div>
       <div class="ai-fresh-body">
         <code class="ai-token" id="aiTokenValue"></code>
-        <button class="btn btn-primary btn-sm" id="aiCopyToken">Copy</button>
+        <button type="button" class="btn btn-primary btn-sm" id="aiCopyToken">Copy</button>
       </div>
       <div class="ai-fresh-exp" id="aiFreshExp"></div>
     </div>
@@ -1746,7 +1752,7 @@
           <button type="button" class="ai-ttl-btn" data-days="0">Never</button>
         </div>
       </div>
-      <button class="btn btn-primary" id="aiGenerate" style="flex:1; align-self:flex-end;">Generate token</button>
+      <button type="button" class="btn btn-primary" id="aiGenerate" style="flex:1; align-self:flex-end;">Generate token</button>
     </div>
     <div class="ai-section" id="aiTokenListWrap" hidden>
       <div class="ai-section-title">Tokens <span class="ai-count" id="aiTokenCount"></span></div>
@@ -1754,8 +1760,8 @@
       <div class="ai-token-actions" id="aiTokenActions" hidden>
         <span class="ai-selected-label" id="aiSelectedLabel"></span>
         <span class="spacer"></span>
-        <button class="btn btn-ghost btn-sm" id="aiTokenCopySel">Copy</button>
-        <button class="btn btn-ghost btn-sm" id="aiTokenRevokeSel">Delete</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="aiTokenCopySel">Copy</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="aiTokenRevokeSel">Delete</button>
       </div>
     </div>
     <div class="ai-examples">
@@ -2177,6 +2183,45 @@
     gwVars.innerHTML = '';
     gwDelBtn.hidden = true;
   }
+  const GW_GEN_POOLS = {
+    payment:   ['STRIPE_KEY', 'STRIPE_WEBHOOK_SECRET', 'MERCHANT_ID', 'CURRENCY', 'PIX_KEY'],
+    smtp:      ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'FROM_ADDRESS'],
+    database:  ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS'],
+    api:       ['API_KEY', 'API_SECRET', 'BASE_URL', 'RATE_LIMIT', 'ORG_ID'],
+    storage:   ['S3_ENDPOINT', 'S3_BUCKET', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'CDN_URL'],
+    auth:      ['JWT_SECRET', 'OAUTH_CLIENT_ID', 'OAUTH_CLIENT_SECRET', 'REFRESH_TTL', 'ISSUER'],
+    webhook:   ['WEBHOOK_URL', 'WEBHOOK_SECRET', 'EVENT_FILTER', 'RETRY_LIMIT'],
+    mailer:    ['MAIL_API_KEY', 'MAIL_FROM', 'MAIL_DOMAIN', 'MAIL_SIGNING_KEY']
+  };
+  const GW_GEN_GENERIC = ['API_KEY', 'API_SECRET', 'ENDPOINT_URL', 'USERNAME', 'PASSWORD', 'TOKEN', 'REGION', 'TIMEOUT_MS'];
+  const GW_GEN_TYPES = Object.keys(GW_GEN_POOLS);
+  function gwGenerate() {
+    const hex = () => Math.random().toString(16).slice(2, 8);
+    fGwName.value = 'gw-' + hex();
+    const type = GW_GEN_TYPES[Math.floor(Math.random() * GW_GEN_TYPES.length)];
+    fGwType.value = type;
+    fGwDesc.value = 'Auto-generated ' + type + ' gateway (sample)';
+    gwVars.innerHTML = '';
+    const keys = GW_GEN_POOLS[type].slice();
+    while (keys.length < 3) keys.push(GW_GEN_GENERIC[Math.floor(Math.random() * GW_GEN_GENERIC.length)]);
+    const used = new Set();
+    const take = () => {
+      let k = keys[Math.floor(Math.random() * keys.length)];
+      let guard = 0;
+      while (used.has(k) && guard++ < 20) k = keys[Math.floor(Math.random() * keys.length)];
+      used.add(k);
+      return k;
+    };
+    const n = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < n; i++) {
+      const secret = Math.random() > 0.45;
+      const key = take();
+      const val = secret ? genPassword() : (key === 'SMTP_PORT' || key === 'DB_PORT' || key === 'RETRY_LIMIT' || key === 'RATE_LIMIT' || key === 'TIMEOUT_MS' || key === 'REFRESH_TTL' ? String(1000 + Math.floor(Math.random() * 9000)) : ('https://' + key.toLowerCase().replace(/_/g, '-') + '.example.com'));
+      gwAddVarRow(key, val, secret);
+    }
+    notify('Generated a random gateway - edit or save it');
+  }
+  $('#gwGenBtn').addEventListener('click', gwGenerate);
   function gwCopyAsEnv(name) {
     const d = gwData.find(x => x.name === name);
     if (!d) return;
@@ -2652,7 +2697,7 @@
   const tunnelTag = $('#tunnelTag'), tunnelBody = $('#tunnelBody'), tunnelUrl = $('#tunnelUrl');
   const tunnelCopyUrl = $('#tunnelCopyUrl'), tunnelStop = $('#tunnelStop');
   const tunnelStartWrap = $('#tunnelStartWrap'), tunnelStart = $('#tunnelStart');
-  let aiTokenCache = '', aiFreshId = '', aiSelected = '';
+  let aiTokenCache = '', aiFreshId = '', aiSelected = '', aiTokens = [];
   function fmtAIDate(iso) {
     if (!iso) return 'never';
     const d = new Date(iso);
@@ -2677,6 +2722,7 @@
     aiPill.className = 'ai-pill ' + (on ? 'ai-on' : 'ai-off');
     aiPillText.textContent = on ? 'Enabled' : 'Disabled';
     const tokens = s.tokens || [];
+    aiTokens = tokens;
     aiTokenListWrap.hidden = !tokens.length;
     aiTokenCount.textContent = tokens.length ? '(' + tokens.length + ')' : '';
     if (tokens.length) {
@@ -2702,6 +2748,7 @@
       }).join('');
       const sel = tokens.find(t => t.id === aiSelected);
       aiTokenActions.hidden = !sel;
+      aiTokenRevokeSel.disabled = false;
       if (sel) {
         aiSelectedLabel.textContent = sel.id + '••••';
         aiTokenRevokeSel.disabled = sel.revoked || (sel.expires && new Date(sel.expires).getTime() < Date.now());
@@ -2777,10 +2824,12 @@
     if (!li) return;
     aiSelected = li.dataset.id;
     aiTokenList.querySelectorAll('.ai-token-item').forEach(x => x.classList.toggle('selected', x === li));
-    const sel = aiTokenListWrap.querySelector('.ai-token-item.selected');
-    const s = sel ? sel.dataset.id : '';
-    aiTokenActions.hidden = !s;
-    if (s) aiSelectedLabel.textContent = s + '••••';
+    const sel = aiTokens.find(t => t.id === aiSelected);
+    aiTokenActions.hidden = !sel;
+    if (sel) {
+      aiSelectedLabel.textContent = sel.id + '••••';
+      aiTokenRevokeSel.disabled = sel.revoked || (sel.expires && new Date(sel.expires).getTime() < Date.now());
+    }
   });
   aiTokenCopySel.addEventListener('click', async () => {
     try {
