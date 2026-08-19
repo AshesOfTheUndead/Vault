@@ -357,4 +357,4 @@ MIT - see [LICENSE](LICENSE).
 - [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) by Florian Karsten
 - [JetBrains Mono](https://www.jetbrains.com/lp/mono/) by JetBrains
 - [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) by Carrois Apostille
-- Inspired by [Render](https://render.com)'s environment variable UI
+
