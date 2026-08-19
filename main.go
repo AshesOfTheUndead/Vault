@@ -33,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "2.5.0"
+	version     = "3.0.0"
 )
 
 var (
@@ -424,6 +424,84 @@ func sendJSON(w http.ResponseWriter, code int, obj interface{}) {
 
 func uptimeSeconds() int64 {
 	return int64(time.Since(startTime).Seconds())
+}
+
+/* ---------- audit log ---------- */
+
+// auditEntry is a single line in the audit log.
+type auditEntry struct {
+	Time   string `json:"time"`
+	Event  string `json:"event"`
+	Name   string `json:"name"`
+	Source string `json:"source"`
+}
+
+func auditFile() string {
+	return filepath.Join(vaultDir, "audit.log")
+}
+
+// auditSafe strips anything that could break the " | " line format or inject
+// fake entries: newlines, control chars, and the pipe separator itself.
+func auditSafe(s string) string {
+	s = strings.ReplaceAll(s, "|", "/")
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' || (r < 0x20 && r != '\t') {
+			return -1
+		}
+		return r
+	}, s)
+}
+
+var auditMu sync.Mutex
+
+// auditLog appends one line to ~/Vault/audit.log. Format:
+//
+//	2026-08-19T15:04:05Z | secret.read | roblox | 127.0.0.1
+//
+// The file is created with 0600 perms so only the owner can read access history.
+func auditLog(event, name, source string) {
+	auditMu.Lock()
+	defer auditMu.Unlock()
+	if name == "" {
+		name = "-"
+	}
+	if source == "" {
+		source = "local"
+	}
+	line := fmt.Sprintf("%s | %s | %s | %s\n",
+		time.Now().Format(time.RFC3339),
+		auditSafe(event), auditSafe(name), auditSafe(source))
+	f, err := os.OpenFile(auditFile(),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.WriteString(line)
+}
+
+// readAuditLog returns the last `limit` entries from the audit log, newest last.
+func readAuditLog(limit int) []auditEntry {
+	data, err := os.ReadFile(auditFile())
+	if err != nil {
+		return []auditEntry{}
+	}
+	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+	if len(lines) > limit {
+		lines = lines[len(lines)-limit:]
+	}
+	result := make([]auditEntry, 0, len(lines))
+	for _, line := range lines {
+		parts := strings.Split(line, " | ")
+		if len(parts) < 4 {
+			continue
+		}
+		result = append(result, auditEntry{
+			Time: parts[0], Event: parts[1],
+			Name: parts[2], Source: parts[3],
+		})
+	}
+	return result
 }
 
 /* ---------- security middleware ---------- */
@@ -892,6 +970,7 @@ func main() {
 		writeMu.Lock()
 		writeDetails(req.Name, req.Details)
 		writeMu.Unlock()
+		auditLog("secret.save", req.Name, clientIP(r))
 		sendJSON(w, 200, map[string]interface{}{"ok": true, "stored": stored})
 	})
 
@@ -912,6 +991,7 @@ func main() {
 			sendJSON(w, 400, map[string]string{"error": err.Error()})
 			return
 		}
+		auditLog("secret.delete", name, clientIP(r))
 		sendJSON(w, 200, map[string]bool{"ok": true})
 	})
 
@@ -975,6 +1055,7 @@ func main() {
 			sendJSON(w, 400, map[string]string{"error": err.Error()})
 			return
 		}
+		auditLog("env.save", req.Key, clientIP(r))
 		sendJSON(w, 200, map[string]interface{}{"ok": true, "stored": stored})
 	})
 
@@ -995,6 +1076,7 @@ func main() {
 			sendJSON(w, 400, map[string]string{"error": err.Error()})
 			return
 		}
+		auditLog("env.delete", key, clientIP(r))
 		sendJSON(w, 200, map[string]bool{"ok": true})
 	})
 
@@ -1088,6 +1170,20 @@ func main() {
 			"goVersion": runtime.Version(),
 			"platform":  runtime.GOOS + "/" + runtime.GOARCH,
 			"port":      port,
+			"lanMode":   lanMode,
+		})
+	})
+
+	/* audit log viewer - returns last 100 entries from ~/Vault/audit.log */
+	mux.HandleFunc("/api/audit", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		entries := readAuditLog(100)
+		sendJSON(w, 200, map[string]interface{}{
+			"entries": entries,
+			"count":   len(entries),
 		})
 	})
 
@@ -1219,6 +1315,7 @@ func main() {
 		if ok {
 			d, _ := readDetails(name)
 			writeMu.Unlock()
+			auditLog("ai.read.secret", name, clientIP(r))
 			log.Printf("ai-access: read secret %q from %s", name, clientIP(r))
 			sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "secret", "value": v, "details": d})
 			return
@@ -1226,6 +1323,7 @@ func main() {
 		ev, _, ok2 := readEnvVar(name)
 		if ok2 {
 			writeMu.Unlock()
+			auditLog("ai.read.env", name, clientIP(r))
 			log.Printf("ai-access: read env var %q from %s", name, clientIP(r))
 			sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "env", "value": ev})
 			return
@@ -1251,13 +1349,17 @@ func main() {
 		for _, v := range envVars {
 			totalSize += int64(len(v.Value))
 		}
+		_, aiEnabled := loadAIToken()
 		sendJSON(w, 200, map[string]interface{}{
-			"secrets":   len(secrets),
-			"envVars":   len(envVars),
-			"totalSize": totalSize,
-			"uptime":    uptimeSeconds(),
-			"version":   version,
-			"dir":       vaultDir,
+			"secrets":         len(secrets),
+			"envVars":         len(envVars),
+			"totalSize":       totalSize,
+			"uptime":          uptimeSeconds(),
+			"version":         version,
+			"dir":             vaultDir,
+			"aiAccessEnabled": aiEnabled,
+			"lanMode":         lanMode,
+			"lanURLs":         lanURLs,
 		})
 	})
 
@@ -1325,11 +1427,12 @@ func main() {
 	log.Printf("vault stopped")
 }
 
-// envLine renders one KEY=value line for .env export, quoting the value
-// when it contains characters that would break the format.
+// envLine renders one KEY=value line for .env export. Values containing
+// whitespace or special characters are double-quoted; the value itself is
+// written verbatim (UTF-8 preserved, no Go-style \uXXXX escapes).
 func envLine(key, val string) string {
 	if strings.ContainsAny(val, "\n\r\" ") || strings.HasPrefix(val, "#") {
-		val = strconv.Quote(val)
+		val = `"` + strings.ReplaceAll(val, `"`, `\"`) + `"`
 	}
 	return key + "=" + val + "\n"
 }

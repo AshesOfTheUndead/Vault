@@ -23,3 +23,7 @@ desktop.ini
 /dist/
 /build/
 *.log
+
+vault-linux-amd64
+vault-darwin-amd64
+vault-darwin-arm64

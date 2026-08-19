@@ -978,6 +978,99 @@
   .sys-chip .v[data-state="warn"]    { color: var(--amber); }
   .sys-chip .v[data-state="err"]     { color: var(--danger); }
 
+  /* audit log modal */
+  .audit-list {
+    list-style: none; margin: 0; padding: 6px;
+    max-height: 50vh; overflow-y: auto;
+    font-family: var(--mono); font-size: 11.5px;
+  }
+  .audit-entry {
+    display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px;
+    padding: 8px 12px; border-radius: var(--r);
+    color: var(--ink-2); align-items: center;
+    transition: background 0.15s var(--ease);
+  }
+  .audit-entry:hover { background: rgba(52, 211, 153, 0.06); color: var(--ink); }
+  .audit-time { color: var(--ink-mute); font-size: 10.5px; white-space: nowrap; }
+  .audit-event {
+    font-family: var(--term); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+    border: 1px solid var(--line);
+  }
+  .audit-event.read   { color: var(--cyan);   border-color: rgba(34,211,238,0.3); background: rgba(34,211,238,0.06); }
+  .audit-event.save   { color: var(--accent); border-color: var(--line-bright); background: rgba(52,211,153,0.06); }
+  .audit-event.delete { color: var(--danger); border-color: rgba(251,113,133,0.3); background: rgba(251,113,133,0.06); }
+  .audit-name { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .audit-source { color: var(--ink-mute); font-size: 10.5px; white-space: nowrap; }
+
+  /* password strength meter */
+  .strength-meter {
+    height: 4px; border-radius: 2px; margin-top: 6px;
+    background: rgba(2, 6, 8, 0.5); overflow: hidden;
+    transition: opacity 0.3s var(--ease);
+    opacity: 0;
+  }
+  .strength-meter[data-show="1"] { opacity: 1; }
+  .strength-bar {
+    height: 100%; width: 0%; border-radius: 2px;
+    transition: width 0.3s var(--ease-out), background 0.3s var(--ease);
+    background: var(--ink-mute);
+  }
+  .strength-bar[data-level="0"] { width: 10%;  background: var(--danger); }
+  .strength-bar[data-level="1"] { width: 25%;  background: var(--danger); }
+  .strength-bar[data-level="2"] { width: 50%;  background: var(--amber); }
+  .strength-bar[data-level="3"] { width: 75%;  background: var(--accent); }
+  .strength-bar[data-level="4"] { width: 100%; background: var(--accent-hi); box-shadow: 0 0 8px var(--accent-glow); }
+  .strength-label {
+    font-family: var(--term); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-top: 4px; color: var(--ink-mute);
+    display: flex; justify-content: space-between;
+  }
+
+  /* recently accessed chips */
+  .recent-row {
+    display: flex; gap: 6px; padding: 8px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    overflow-x: auto; align-items: center;
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.03), transparent);
+  }
+  .recent-row[hidden] { display: none; }
+  .recent-label {
+    font-family: var(--term); font-size: 9px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-mute); white-space: nowrap; flex: none;
+    padding-right: 4px;
+  }
+  .recent-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--ink-2); font-family: var(--mono); font-size: 11px;
+    cursor: pointer; white-space: nowrap; flex: none;
+    transition: color 0.18s var(--ease), border-color 0.18s var(--ease), background 0.18s var(--ease), transform 0.18s var(--ease);
+  }
+  .recent-chip:hover {
+    color: var(--accent); border-color: var(--line-bright);
+    background: var(--surface-2); transform: translateY(-1px);
+  }
+  .recent-chip svg { width: 11px; height: 11px; }
+
+  /* QR code display (for LAN phone access) */
+  .qr-wrap {
+    display: grid; place-items: center; padding: 16px;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: var(--r); margin: 12px 0;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 0 1px var(--line-bright);
+  }
+  .qr-wrap svg { display: block; }
+  .qr-url {
+    text-align: center; font-family: var(--mono); font-size: 11px;
+    color: var(--accent); margin-top: 8px;
+    word-break: break-all;
+  }
+
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb {
     background: rgba(52, 211, 153, 0.2); border-radius: 6px;
@@ -1067,7 +1160,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.5</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v3.0</span>
         </h1>
       </div>
       <p class="tag">
@@ -1128,6 +1221,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M22 9h-2M2 9h2"/></svg>
         AI
       </button>
+      <button class="btn btn-ghost btn-sm" id="auditBtn" title="View access history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+      </button>
       <button class="btn btn-ghost btn-sm" id="helpBtn" title="Keyboard shortcuts (?)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </button>
@@ -1166,6 +1262,12 @@
               <button type="button" class="reveal" id="fReveal" title="Show / hide value" aria-label="Show or hide value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
+            </div>
+            <div class="strength-meter" id="fStrengthMeter" data-show="0">
+              <div class="strength-bar" id="fStrengthBar"></div>
+            </div>
+            <div class="strength-label" id="fStrengthLabel" hidden>
+              <span>strength</span><span id="fStrengthText"></span>
             </div>
           </div>
           <div class="field">
@@ -1213,6 +1315,12 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
+            <div class="strength-meter" id="fEnvStrengthMeter" data-show="0">
+              <div class="strength-bar" id="fEnvStrengthBar"></div>
+            </div>
+            <div class="strength-label" id="fEnvStrengthLabel" hidden>
+              <span>strength</span><span id="fEnvStrengthText"></span>
+            </div>
           </div>
           <div class="field">
             <label>Visibility</label>
@@ -1243,11 +1351,17 @@
     </div>
     <div class="pane" id="paneSecrets">
       <div class="pane-content">
+        <div class="recent-row" id="recentRow" hidden>
+          <span class="recent-label">Recent</span>
+        </div>
         <ul class="list" id="list"></ul>
       </div>
     </div>
     <div class="pane" id="paneEnv" hidden>
       <div class="pane-content">
+        <div class="recent-row" id="envRecentRow" hidden>
+          <span class="recent-label">Recent</span>
+        </div>
         <ul class="list" id="envList"></ul>
       </div>
     </div>
@@ -1332,6 +1446,20 @@
   </div>
 </div>
 
+<!-- audit log modal -->
+<div class="modal-backdrop" id="auditModal" role="dialog" aria-modal="true" aria-labelledby="auditTitle">
+  <div class="modal">
+    <h2 id="auditTitle">Access History</h2>
+    <p style="margin-bottom: 12px;">Last 100 access events from <code>~/Vault/audit.log</code>.</p>
+    <ul class="audit-list" id="auditList">
+      <li class="cmd-empty">No events yet<span class="c"></span></li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="auditClose" style="flex:1;">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- command palette -->
 <div class="cmd-backdrop" id="cmdBackdrop" role="dialog" aria-modal="true" aria-label="Command palette">
   <div class="cmd-modal" role="combobox" aria-expanded="true">
@@ -1361,6 +1489,10 @@
   const confirmModal = $('#confirmModal'), confirmName = $('#confirmName');
   const confirmCancel = $('#confirmCancel'), confirmDelete = $('#confirmDelete');
   const helpModal = $('#helpModal'), helpBtn = $('#helpBtn'), helpClose = $('#helpClose');
+  const auditBtn = $('#auditBtn'), auditModal = $('#auditModal'), auditList = $('#auditList'), auditClose = $('#auditClose');
+  const recentRow = $('#recentRow'), envRecentRow = $('#envRecentRow');
+  const fStrengthMeter = $('#fStrengthMeter'), fStrengthBar = $('#fStrengthBar'), fStrengthLabel = $('#fStrengthLabel'), fStrengthText = $('#fStrengthText');
+  const fEnvStrengthMeter = $('#fEnvStrengthMeter'), fEnvStrengthBar = $('#fEnvStrengthBar'), fEnvStrengthLabel = $('#fEnvStrengthLabel'), fEnvStrengthText = $('#fEnvStrengthText');
   const tabs = $('#tabs'), tabIndicator = $('#tabIndicator');
   const paneSecrets = $('#paneSecrets'), paneEnv = $('#paneEnv');
   const panePath = $('#panePath'), newBtnLabel = $('#newBtnLabel');
@@ -1382,6 +1514,119 @@
   function maskValue(v) {
     if (!v) return '';
     return '•'.repeat(Math.min(12, Math.max(8, v.length)));
+  }
+
+  /* password strength estimator (0=very weak → 4=strong) */
+  function strengthLevel(v) {
+    if (!v) return -1;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (v.length >= 14) score++;
+    let variety = 0;
+    if (/[a-z]/.test(v)) variety++;
+    if (/[A-Z]/.test(v)) variety++;
+    if (/[0-9]/.test(v)) variety++;
+    if (/[^a-zA-Z0-9]/.test(v)) variety++;
+    if (variety >= 2) score++;
+    if (variety >= 3) score++;
+    if (variety >= 4 && v.length >= 12) score++;
+    if (score > 4) score = 4;
+    return score;
+  }
+  const STRENGTH_LABELS = ['very weak', 'weak', 'fair', 'good', 'strong'];
+  function updateStrength(el, bar, label, text, v) {
+    const lvl = strengthLevel(v);
+    if (lvl < 0) {
+      el.dataset.show = '0';
+      label.hidden = true;
+      return;
+    }
+    el.dataset.show = '1';
+    bar.dataset.level = String(lvl);
+    label.hidden = false;
+    text.textContent = STRENGTH_LABELS[lvl];
+  }
+
+  /* audit log */
+  async function loadAudit() {
+    try {
+      const j = await api('/api/audit');
+      const entries = j.entries || [];
+      if (!entries.length) {
+        auditList.innerHTML = '<li class="cmd-empty">No events yet<span class="c"></span></li>';
+        return;
+      }
+      // newest first
+      entries.reverse();
+      auditList.innerHTML = entries.map(e => {
+        const ev = e.event || '';
+        const cls = ev.includes('delete') ? 'delete' : (ev.includes('read') ? 'read' : 'save');
+        const t = (e.time || '').replace('T', ' ').replace(/:\d{2}Z$/, '').replace('Z', '');
+        return `<li class="audit-entry">
+          <span class="audit-time">${esc(t)}</span>
+          <span class="audit-event ${cls}">${esc(ev)}</span>
+          <span class="audit-name">${esc(e.name || '-')}</span>
+          <span class="audit-source">${esc(e.source || 'local')}</span>
+        </li>`;
+      }).join('');
+    } catch (e) {
+      auditList.innerHTML = '<li class="cmd-empty">Failed to load<span class="c"></span></li>';
+    }
+  }
+
+  /* recently accessed (localStorage) */
+  function getRecent(kind) {
+    try {
+      const raw = localStorage.getItem('vault-recent-' + kind);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  }
+  function pushRecent(kind, name) {
+    try {
+      let list = getRecent(kind);
+      list = list.filter(n => n !== name);
+      list.unshift(name);
+      list = list.slice(0, 6);
+      localStorage.setItem('vault-recent-' + kind, JSON.stringify(list));
+    } catch {}
+    renderRecent();
+  }
+  function renderRecent() {
+    renderRecentKind(recentRow, 'secret');
+    renderRecentKind(envRecentRow, 'env');
+  }
+  function renderRecentKind(row, kind) {
+    const list = getRecent(kind);
+    if (!list.length) { row.hidden = true; return; }
+    row.hidden = false;
+    // remove old chips (keep label)
+    row.querySelectorAll('.recent-chip').forEach(el => el.remove());
+    const iconSvg = kind === 'env'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    for (const name of list) {
+      const chip = document.createElement('button');
+      chip.className = 'recent-chip';
+      chip.innerHTML = iconSvg + '<span>' + esc(name) + '</span>';
+      chip.title = 'Open ' + esc(name);
+      chip.addEventListener('click', () => {
+        if (kind === 'env') openEnvEditor(name);
+        else openEditor(name);
+      });
+      row.appendChild(chip);
+    }
+  }
+
+  /* clipboard auto-clear (30s countdown) */
+  let clipboardTimer = null;
+  let clipboardName = '';
+  async function clearClipboard() {
+    try { await navigator.clipboard.writeText(''); } catch {}
+    if (clipboardName) {
+      notify(`Cleared clipboard for <code>${esc(clipboardName)}</code>`);
+      clipboardName = '';
+    }
+    clipboardTimer = null;
   }
 
   function notify(msg, kind, opts) {
@@ -1569,7 +1814,9 @@
   let lastSig = '';
 
   function sigOf(sec, env) {
-    const a = (sec.entries || []).map(d => d.name + '\u0001' + (d.size || 0)).join('|');
+    // secrets: use the entry mtime (updated) so value edits AND details edits
+    // propagate to other tabs; size alone missed both
+    const a = (sec.entries || []).map(d => d.name + '\u0001' + (d.updated || 0)).join('|');
     const b = (env.entries || []).map(d => d.key + '\u0001' + (d.secret ? 1 : 0) + '\u0001' + (d.value || '')).join('|');
     return a + '#' + b;
   }
@@ -1596,7 +1843,9 @@
       setStat(rows.length, rows.length === 1 ? 'secret' : 'secrets');
       footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' · ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
-        list.innerHTML = emptyState('lock', 'Nothing locked away yet.', 'Add your first secret with the <strong>New secret</strong> button above.');
+        list.innerHTML = data.length
+          ? emptyState('lock', 'No matches for your filter.', 'Clear the search box to see all secrets.')
+          : emptyState('lock', 'Nothing locked away yet.', 'Add your first secret with the <strong>New secret</strong> button above.');
       } else {
         list.innerHTML = rows.map((d, i) => `
           <li data-name="${esc(d.name)}" ${quiet ? 'style="animation:none"' : `style="animation-delay:${i * 50}ms"`}>
@@ -1628,7 +1877,9 @@
       setStat(rows.length, rows.length === 1 ? 'env var' : 'env vars');
       footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' · ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
-        envList.innerHTML = emptyState('env', 'No environment variables yet.', 'Add your first env var with the <strong>New env var</strong> button above.');
+        envList.innerHTML = envData.length
+          ? emptyState('env', 'No matches for your filter.', 'Clear the search box to see all env vars.')
+          : emptyState('env', 'No environment variables yet.', 'Add your first env var with the <strong>New env var</strong> button above.');
       } else {
         envList.innerHTML = rows.map((d, i) => {
           const valDisplay = d.secret
@@ -1687,19 +1938,29 @@
       if (!d) return;
       value = d.value || '';
     }
+    let copied = false;
     try {
       await navigator.clipboard.writeText(value);
-      notify(`Copied <code>${esc(name)}</code> to clipboard`);
+      copied = true;
     } catch {
       const ta = document.createElement('textarea');
       ta.value = value;
       ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); notify(`Copied <code>${esc(name)}</code> to clipboard`); }
+      try { document.execCommand('copy'); copied = true; }
       catch { notify('Copy failed. Reveal the value manually.', 'err'); }
       ta.remove();
     }
-    copyFlash(btn);
+    if (copied) {
+      // push to recently accessed
+      pushRecent(isEnv ? 'env' : 'secret', name);
+      // set up clipboard auto-clear
+      if (clipboardTimer) clearTimeout(clipboardTimer);
+      clipboardName = name;
+      clipboardTimer = setTimeout(clearClipboard, 30000);
+      notify(`Copied <code>${esc(name)}</code> - clipboard clears in 30s`);
+      copyFlash(btn);
+    }
   }
 
   function copyFlash(btn) {
@@ -1820,6 +2081,34 @@
   helpClose.addEventListener('click', () => helpModal.classList.remove('open'));
   helpModal.addEventListener('click', (ev) => {
     if (ev.target === helpModal) helpModal.classList.remove('open');
+  });
+
+  // audit log modal
+  auditBtn.addEventListener('click', async () => {
+    auditModal.classList.add('open');
+    await loadAudit();
+  });
+  auditClose.addEventListener('click', () => auditModal.classList.remove('open'));
+  auditModal.addEventListener('click', (ev) => {
+    if (ev.target === auditModal) auditModal.classList.remove('open');
+  });
+
+  // password strength meters
+  fVal.addEventListener('input', () => {
+    if (fVal.type === 'password') {
+      updateStrength(fStrengthMeter, fStrengthBar, fStrengthLabel, fStrengthText, fVal.value);
+    } else {
+      fStrengthMeter.dataset.show = '0';
+      fStrengthLabel.hidden = true;
+    }
+  });
+  fEnvVal.addEventListener('input', () => {
+    if (fEnvVal.type === 'password') {
+      updateStrength(fEnvStrengthMeter, fEnvStrengthBar, fEnvStrengthLabel, fEnvStrengthText, fEnvVal.value);
+    } else {
+      fEnvStrengthMeter.dataset.show = '0';
+      fEnvStrengthLabel.hidden = true;
+    }
   });
 
   // AI access panel
@@ -1944,11 +2233,15 @@
     const on = fReveal.dataset.on === '1';
     fVal.type = on ? 'password' : 'text';
     fReveal.dataset.on = on ? '' : '1';
+    if (on) updateStrength(fStrengthMeter, fStrengthBar, fStrengthLabel, fStrengthText, fVal.value);
+    else { fStrengthMeter.dataset.show = '0'; fStrengthLabel.hidden = true; }
   });
   fEnvReveal.addEventListener('click', () => {
     const on = fEnvReveal.dataset.on === '1';
     fEnvVal.type = on ? 'password' : 'text';
     fEnvReveal.dataset.on = on ? '' : '1';
+    if (on) updateStrength(fEnvStrengthMeter, fEnvStrengthBar, fEnvStrengthLabel, fEnvStrengthText, fEnvVal.value);
+    else { fEnvStrengthMeter.dataset.show = '0'; fEnvStrengthLabel.hidden = true; }
   });
 
   function genPassword() {
@@ -1963,12 +2256,14 @@
     fVal.value = genPassword();
     fVal.type = 'text';
     fReveal.dataset.on = '1';
+    updateStrength(fStrengthMeter, fStrengthBar, fStrengthLabel, fStrengthText, fVal.value);
     notify('Generated a 20-character password - copy it somewhere safe');
   });
   fEnvGen.addEventListener('click', () => {
     fEnvVal.value = genPassword();
     fEnvVal.type = 'text';
     fEnvReveal.dataset.on = '1';
+    updateStrength(fEnvStrengthMeter, fEnvStrengthBar, fEnvStrengthLabel, fEnvStrengthText, fEnvVal.value);
     notify('Generated a 20-character random value');
   });
 
@@ -2034,6 +2329,7 @@
     }
     if (ev.key === 'Escape') {
       if (cmdBackdrop.classList.contains('open')) { closeCmdPalette(); return; }
+      if (auditModal.classList.contains('open')) { auditModal.classList.remove('open'); return; }
       if (helpModal.classList.contains('open')) { helpModal.classList.remove('open'); return; }
       if (aiModal.classList.contains('open')) { aiModal.classList.remove('open'); return; }
       if (confirmModal.classList.contains('open')) { hideConfirm(); return; }
@@ -2052,7 +2348,8 @@
   function anyModalOpen() {
     return editor.classList.contains('open') || envEditor.classList.contains('open') ||
       confirmModal.classList.contains('open') || helpModal.classList.contains('open') ||
-      aiModal.classList.contains('open') || cmdBackdrop.classList.contains('open');
+      aiModal.classList.contains('open') || auditModal.classList.contains('open') ||
+      cmdBackdrop.classList.contains('open');
   }
 
   /* ---------- live connection status indicator ---------- */
@@ -2109,6 +2406,7 @@
     items.push({ type: 'action', label: 'Export env vars as .env', cat: 'action', icon: 'download', run: () => { switchTab('env'); window.location.href = API + '/api/env/export'; } });
     items.push({ type: 'action', label: 'Import env vars from .env', cat: 'action', icon: 'upload', run: () => { switchTab('env'); envFileInput.click(); } });
     items.push({ type: 'action', label: 'Manual refresh', cat: 'action', icon: 'refresh', run: () => refresh() });
+    items.push({ type: 'action', label: 'View access history', cat: 'action', icon: 'audit', run: () => { auditModal.classList.add('open'); loadAudit(); } });
     items.push({ type: 'action', label: 'Show keyboard shortcuts', cat: 'action', icon: 'help', run: () => helpModal.classList.add('open') });
     // secrets
     for (const d of data) {
@@ -2127,6 +2425,7 @@
       download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
       upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
       refresh: '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9A9 9 0 0 1 18.36 5.64L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+      audit: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
       help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
       lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
       var: '<path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/>'
@@ -2222,6 +2521,7 @@
 
   setTimeout(positionTabIndicator, 100);
   window.addEventListener('resize', positionTabIndicator);
+  renderRecent(); // load recently-accessed chips from localStorage
 
   let raf = null;
   document.addEventListener('mousemove', (e) => {

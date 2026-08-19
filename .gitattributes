@@ -1,0 +1,7 @@
+* text=auto
+*.go text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.mod text eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf
