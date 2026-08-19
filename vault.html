@@ -2242,6 +2242,7 @@
   const aiTtl = $('#aiTtl'), aiGenerate = $('#aiGenerate');
   const aiTokenListWrap = $('#aiTokenListWrap'), aiTokenList = $('#aiTokenList'), aiTokenCount = $('#aiTokenCount');
   let aiTokenCache = '';
+  let aiFreshId = '';
   function fmtAIDate(iso) {
     if (!iso) return 'never';
     const d = new Date(iso);
@@ -2299,6 +2300,7 @@
         body: JSON.stringify({ days })
       });
       aiTokenCache = j.token;
+      aiFreshId = j.id;
       aiTokenValue.textContent = j.token;
       aiFreshExp.textContent = j.expires
         ? 'expires ' + fmtAIDate(j.expires)
@@ -2329,7 +2331,12 @@
     btn.classList.add('btn-busy');
     try {
       await api('/api/ai/token?id=' + encodeURIComponent(btn.dataset.id), { method: 'DELETE' });
-      notify('Token revoked - access cut off immediately');
+      if (btn.dataset.id === aiFreshId) {
+        aiTokenCache = '';
+        aiFreshId = '';
+        aiFresh.hidden = true;
+      }
+      notify('Token deleted - it is gone for good');
       renderAiStatus(await api('/api/ai/status'));
     } catch (e) {
       notify('Revoke failed: ' + esc(e.message), 'err');

@@ -33,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "3.1.0"
+	version     = "3.1.1"
 )
 
 var (
@@ -1390,16 +1390,18 @@ func main() {
 			id := strings.TrimSpace(r.URL.Query().Get("id"))
 			tokensMu.Lock()
 			tokens := loadAITokens()
+			kept := tokens[:0]
 			found := false
-			for i := range tokens {
-				if tokens[i].ID == id && !tokens[i].Revoked {
-					tokens[i].Revoked = true
+			for _, t := range tokens {
+				if t.ID == id {
 					found = true
+					continue
 				}
+				kept = append(kept, t)
 			}
 			var err error
 			if found {
-				err = saveAITokens(tokens)
+				err = saveAITokens(kept)
 			}
 			tokensMu.Unlock()
 			if !found {
@@ -1410,7 +1412,7 @@ func main() {
 				sendJSON(w, 500, map[string]string{"error": "could not save token"})
 				return
 			}
-			log.Printf("ai-access: token %s revoked", id)
+			log.Printf("ai-access: token %s deleted", id)
 			sendJSON(w, 200, map[string]string{"ok": "true"})
 		default:
 			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
