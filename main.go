@@ -33,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "3.1.1"
+	version     = "3.1.2"
 )
 
 var (
@@ -612,6 +612,19 @@ func readAuditLog(limit int) []auditEntry {
 
 /* ---------- security middleware ---------- */
 
+// addAllowedHosts merges extra comma-separated hostnames from VAULT_ALLOW_HOSTS
+// into the Host allowlist, so the vault can sit behind a tunnel (ngrok,
+// cloudflare) or a reverse proxy with a public hostname.
+func addAllowedHosts(list string) {
+	allowedMu.Lock()
+	defer allowedMu.Unlock()
+	for _, h := range strings.Split(list, ",") {
+		if h = strings.TrimSpace(h); h != "" {
+			allowedHosts[normalizeHost(h)] = true
+		}
+	}
+}
+
 // buildAllowedHosts populates the Host/Origin allowlist. Loopback is always
 // allowed; in LAN mode (bind to 0.0.0.0 / a LAN IP) every local interface IP
 // plus the machine hostname is allowed, so phones/Termux can reach the vault.
@@ -977,6 +990,7 @@ func main() {
 	}
 	lanMode := bindHost != "127.0.0.1" && bindHost != "::1"
 	lanURLs := buildAllowedHosts(port, lanMode, bindHost)
+	addAllowedHosts(os.Getenv("VAULT_ALLOW_HOSTS"))
 	if lanMode {
 		go func() {
 			tick := time.NewTicker(30 * time.Second)

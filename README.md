@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
-[![Version](https://img.shields.io/badge/version-3.1.1-34d399)](#)
+[![Version](https://img.shields.io/badge/version-3.1.2-34d399)](#)
 
 ---
 
@@ -98,6 +98,7 @@ build.bat         # windows
 vault.exe -port 8080           # use a different port
 vault.exe -version              # print version
 vault.exe -no-browser           # don't auto-open browser
+VAULT_ALLOW_HOSTS=api.example.com vault.exe --lan   # allow a tunnel/reverse-proxy hostname (comma-separated)
 ```
 
 ---
@@ -239,6 +240,26 @@ vault.exe --lan
 #   lan    http://192.168.1.51:7575
 # open one on your phone - the vault auto-allows your NIC IPs
 ```
+
+### Exposing to a cloud AI (tunnel)
+
+To let a web/cloud AI (with code execution) reach the vault, put it behind an HTTPS tunnel and tell the vault to accept the tunnel's hostname:
+
+```bash
+# 1. tunnel port 7575 to a public HTTPS URL (cloudflared example)
+cloudflared tunnel --url http://localhost:7575
+#    -> https://random-name.trycloudflare.com
+
+# 2. restart the vault, allowing that hostname (comma-separated for several)
+set VAULT_ALLOW_HOSTS=random-name.trycloudflare.com
+vault.exe --lan
+
+# 3. give the AI the public URL + a bearer token (AI Access -> Generate):
+curl -H "Authorization: Bearer TOKEN" https://random-name.trycloudflare.com/api/ai/list
+curl -H "Authorization: Bearer TOKEN" "https://random-name.trycloudflare.com/api/ai/read?name=Github"
+```
+
+The token still gates every read (expiry + rate limit + per-token revoke). The tunnel provides TLS, so the token is encrypted in transit. Revoke the token in the UI when done.
 
 ---
 
