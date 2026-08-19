@@ -19,6 +19,21 @@ This guide has three tracks. Pick the one that fits you:
 Each track ends with its own **Problems, trials, and errors** section, so you can
 find the exact fix for whatever went wrong.
 
+## Report a bug (please!)
+
+Found something that is broken, confusing, or just plain wrong? Tell us - every
+report makes the vault better.
+
+1. Go to the [Issues page](https://github.com/AshesOfTheUndead/Vault/issues).
+2. Click **New issue** -> **Bug report** (a form opens with the right questions).
+3. Fill in: what happened, how to reproduce it, your version (the badge in the
+   top-left, e.g. `v4.0.1`), and your operating system.
+4. Paste the error message and console output. **Never paste secret values or
+   tokens** - remove them first.
+
+A good report is answered fast. Reports without a version and reproduction
+steps are hard to fix - the more detail, the better.
+
 ---
 
 # 1. BEGINNER TRACK
@@ -121,6 +136,8 @@ secrets. You give it two things: an **address** (the tunnel URL) and a
 | The tunnel says "off" | Restarted the vault | Restarting the vault stops the tunnel. Click **Start tunnel** again and use the new URL |
 | The AI says "401" | Gave it my token | The token is wrong or expired. Generate a fresh one |
 | The AI says "403" | Gave it the old address | The tunnel URL changed. Copy the new one from AI Access |
+
+Not in the list? Open a [bug report](https://github.com/AshesOfTheUndead/Vault/issues/new?template=bug_report.md) - tell us exactly what you tried.
 
 ---
 
@@ -314,6 +331,8 @@ Tunnel:
 | Clipboard cleared too fast | Copying a long value | The 30-second auto-clear is by design. Re-copy right before pasting |
 | AI reads show in audit log | Investigated a breach | That is a feature: every AI read records source IP + timestamp in `audit.log` |
 
+Not in the list? Open a [bug report](https://github.com/AshesOfTheUndead/Vault/issues/new?template=bug_report.md) - include the endpoint, the status code, and how you call it.
+
 ---
 
 # 3. PROFESSIONAL TRACK
@@ -424,6 +443,8 @@ IP. `/api/audit` exposes the last 100 events for the UI's Access History.
 | Audit log grew huge | Long-running vault | Rotate `audit.log` with your normal log rotation. Vault appends; it never truncates |
 | Multi-user access | Several people need the vault | Vault is single-user by design. Front it with a token-gated reverse proxy + TLS, or move to a shared secrets manager |
 | Compliance needs encryption-at-rest proof | Auditor asks how data is stored | Vault stores plaintext by design - document it. Add `gocryptfs`/`VeraCrypt` for at-rest encryption and re-verify the backup pipeline |
+
+Not in the list? Open a [bug report](https://github.com/AshesOfTheUndead/Vault/issues/new?template=bug_report.md) - include the exact error, version, and your setup.
 
 ## Building from source
 
