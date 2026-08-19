@@ -1383,7 +1383,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v4.0</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v" id="verBadge">v4.0.1</span>
         </h1>
       </div>
       <p class="tag">
@@ -3277,6 +3277,9 @@
   refresh().finally(function loop() {
     sync().finally(() => setTimeout(loop, 4000));
   });
+  api('/api/version').then(v => {
+    if (v && v.version) $('#verBadge').textContent = 'v' + v.version;
+  }).catch(() => {});
 
   setTimeout(positionTabIndicator, 100);
   window.addEventListener('resize', positionTabIndicator);
