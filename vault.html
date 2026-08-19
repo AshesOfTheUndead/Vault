@@ -1152,17 +1152,67 @@
   .ai-fresh-exp::before { content: '◷'; color: var(--accent); font-size: 11px; }
 
   .ai-gen-row { display: flex; gap: 12px; align-items: stretch; margin-bottom: 16px; }
-  .ai-ttl {
-    display: flex; flex-direction: column; gap: 5px; flex: none;
+  .ai-ttl { display: flex; flex-direction: column; gap: 5px; flex: none; }
+  .ai-ttl-label {
     font-family: var(--mono); font-size: 9.5px; font-weight: 600;
     letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute);
   }
-  .ai-ttl select {
-    font-family: var(--mono); font-size: 12px; color: var(--ink);
-    background: var(--surface-2); border: 1px solid var(--line);
-    border-radius: var(--r); padding: 8px 10px; cursor: pointer;
+  .ai-ttl-seg {
+    display: flex; border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface-2); overflow: hidden;
   }
-  .ai-ttl select:hover, .ai-ttl select:focus-visible { border-color: var(--accent); outline: none; }
+  .ai-ttl-btn {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    background: transparent; border: 0; cursor: pointer;
+    padding: 8px 10px;
+    border-right: 1px solid var(--line);
+    transition: color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .ai-ttl-btn:last-child { border-right: 0; }
+  .ai-ttl-btn:hover { color: var(--ink); }
+  .ai-ttl-btn.active {
+    color: var(--accent-hi); background: rgba(52, 211, 153, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.35);
+  }
+
+  .ai-tunnel { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; background: var(--surface-2); }
+  .ai-tunnel .ai-section-title { margin-bottom: 4px; }
+  .ai-tag {
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--ink-mute);
+  }
+  .ai-tag.on { color: var(--accent-hi); border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.08); }
+  .ai-tag.err { color: var(--danger); border-color: rgba(251, 113, 133, 0.4); background: rgba(251, 113, 133, 0.08); }
+  .ai-tunnel-desc { margin: 0 0 10px; font-size: 12px; color: var(--ink-2); line-height: 1.55; }
+  .ai-tunnel-body { display: flex; gap: 8px; align-items: stretch; }
+  .ai-tunnel-body .ai-token { flex: 1; min-width: 0; }
+  .ai-tunnel-start { margin-top: 4px; }
+
+  .ai-token-item {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .ai-token-item:hover { border-color: var(--line-bright); }
+  .ai-token-item.selected {
+    border-color: rgba(52, 211, 153, 0.5);
+    background: rgba(52, 211, 153, 0.07);
+    box-shadow: 0 0 18px rgba(52, 211, 153, 0.12);
+  }
+  .ai-token-item.ai-item-revoked { opacity: 0.55; }
+  .ai-token-actions {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .ai-selected-label { font-family: var(--mono); font-size: 10.5px; color: var(--accent-hi); }
+  .ai-token-actions .spacer { flex: 1; }
 
   .ai-section { margin-bottom: 16px; }
   .ai-section-title {
@@ -1172,16 +1222,6 @@
   }
   .ai-count { color: var(--ink-mute); font-weight: 400; letter-spacing: 0; }
   .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  .ai-token-item {
-    display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px;
-    align-items: center;
-    padding: 10px 12px;
-    border: 1px solid var(--line); border-radius: var(--r);
-    background: var(--surface-2);
-    transition: border-color 0.2s var(--ease);
-  }
-  .ai-token-item:hover { border-color: var(--line-bright); }
-  .ai-token-item.ai-item-revoked { opacity: 0.55; }
   .ai-token-id { font-family: var(--mono); font-size: 12px; color: var(--ink); letter-spacing: 0.06em; }
   .ai-token-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .ai-token-created { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); }
@@ -1196,7 +1236,6 @@
   .ai-badge-active { color: var(--accent-hi); border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.08); }
   .ai-badge-expired { color: var(--danger); border-color: rgba(251, 113, 133, 0.4); background: rgba(251, 113, 133, 0.08); }
   .ai-badge-revoked { color: var(--ink-mute); }
-  .ai-revoke { white-space: nowrap; }
 
   .ai-example {
     margin: 0; text-align: left; justify-content: flex-start;
@@ -1504,7 +1543,19 @@
       <h2 id="aiTitle">AI Access</h2>
       <span class="ai-pill ai-off" id="aiPill"><i></i><span id="aiPillText">Disabled</span></span>
     </div>
-    <p class="ai-desc">Token-protected API for AI tools and scripts. Anyone holding a token can read every value. Revoke a token to cut off access immediately.</p>
+    <p class="ai-desc">Token-protected API for AI tools and scripts. Anyone holding a token can read every value. Delete a token to cut off access immediately.</p>
+    <div class="ai-section ai-tunnel">
+      <div class="ai-section-title">HTTPS tunnel <span class="ai-tag" id="tunnelTag">off</span></div>
+      <p class="ai-tunnel-desc">Expose the vault to cloud AIs through a Cloudflare tunnel. Start it, copy the URL, and give it to your AI together with a token.</p>
+      <div class="ai-tunnel-body" id="tunnelBody" hidden>
+        <code class="ai-token" id="tunnelUrl"></code>
+        <button class="btn btn-ghost btn-sm" id="tunnelCopyUrl">Copy URL</button>
+        <button class="btn btn-ghost btn-sm" id="tunnelStop">Stop</button>
+      </div>
+      <div class="ai-tunnel-start" id="tunnelStartWrap" hidden>
+        <button class="btn btn-primary btn-sm" id="tunnelStart">Start tunnel</button>
+      </div>
+    </div>
     <div class="ai-fresh" id="aiFresh" hidden>
       <div class="ai-fresh-top">
         <span class="ai-fresh-title">Token generated</span>
@@ -1517,20 +1568,26 @@
       <div class="ai-fresh-exp" id="aiFreshExp"></div>
     </div>
     <div class="ai-gen-row">
-      <label class="ai-ttl">
-        <span>Valid for</span>
-        <select id="aiTtl">
-          <option value="1">1 day</option>
-          <option value="7" selected>7 days</option>
-          <option value="30">30 days</option>
-          <option value="0">Never</option>
-        </select>
-      </label>
+      <div class="ai-ttl">
+        <span class="ai-ttl-label">Valid for</span>
+        <div class="ai-ttl-seg" id="aiTtlSeg" role="group" aria-label="Token validity">
+          <button type="button" class="ai-ttl-btn" data-days="1">1 day</button>
+          <button type="button" class="ai-ttl-btn active" data-days="7">7 days</button>
+          <button type="button" class="ai-ttl-btn" data-days="30">30 days</button>
+          <button type="button" class="ai-ttl-btn" data-days="0">Never</button>
+        </div>
+      </div>
       <button class="btn btn-primary" id="aiGenerate" style="flex:1; align-self:flex-end;">Generate token</button>
     </div>
     <div class="ai-section" id="aiTokenListWrap" hidden>
       <div class="ai-section-title">Tokens <span class="ai-count" id="aiTokenCount"></span></div>
       <ul class="ai-token-list" id="aiTokenList"></ul>
+      <div class="ai-token-actions" id="aiTokenActions" hidden>
+        <span class="ai-selected-label" id="aiSelectedLabel"></span>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" id="aiTokenCopySel">Copy</button>
+        <button class="btn btn-ghost btn-sm" id="aiTokenRevokeSel">Delete</button>
+      </div>
     </div>
     <div class="ai-examples">
       <div class="ai-example-title">curl usage</div>
@@ -1833,6 +1890,7 @@
     fDet.value = d ? (d.details || '') : '';
     fVal.type = 'password';
     delete fReveal.dataset.on;
+    fReveal.innerHTML = ICON_EYE_OFF;
     editor.classList.add('open');
     setTimeout(() => (name ? fVal : fName).focus(), 120);
   }
@@ -1842,6 +1900,7 @@
     fName.value = fVal.value = fDet.value = '';
     fVal.type = 'password';
     delete fReveal.dataset.on;
+    fReveal.innerHTML = ICON_EYE_OFF;
     delBtn.hidden = true;
   }
 
@@ -1856,6 +1915,7 @@
     fSecret.checked = d ? d.secret : false;
     fEnvVal.type = 'password';
     delete fEnvReveal.dataset.on;
+    fEnvReveal.innerHTML = ICON_EYE_OFF;
     envEditor.classList.add('open');
     setTimeout(() => (key ? fEnvVal : fKey).focus(), 120);
   }
@@ -1866,6 +1926,7 @@
     fSecret.checked = false;
     fEnvVal.type = 'password';
     delete fEnvReveal.dataset.on;
+    fEnvReveal.innerHTML = ICON_EYE_OFF;
     envDelBtn.hidden = true;
   }
 
@@ -2239,14 +2300,32 @@
   // AI access panel
   const aiModal = $('#aiModal'), aiPill = $('#aiPill'), aiPillText = $('#aiPillText');
   const aiFresh = $('#aiFresh'), aiTokenValue = $('#aiTokenValue'), aiCopyToken = $('#aiCopyToken'), aiFreshExp = $('#aiFreshExp');
-  const aiTtl = $('#aiTtl'), aiGenerate = $('#aiGenerate');
+  const aiTtlSeg = $('#aiTtlSeg'), aiGenerate = $('#aiGenerate');
   const aiTokenListWrap = $('#aiTokenListWrap'), aiTokenList = $('#aiTokenList'), aiTokenCount = $('#aiTokenCount');
-  let aiTokenCache = '';
-  let aiFreshId = '';
+  const aiTokenActions = $('#aiTokenActions'), aiSelectedLabel = $('#aiSelectedLabel');
+  const aiTokenCopySel = $('#aiTokenCopySel'), aiTokenRevokeSel = $('#aiTokenRevokeSel');
+  const tunnelTag = $('#tunnelTag'), tunnelBody = $('#tunnelBody'), tunnelUrl = $('#tunnelUrl');
+  const tunnelCopyUrl = $('#tunnelCopyUrl'), tunnelStop = $('#tunnelStop');
+  const tunnelStartWrap = $('#tunnelStartWrap'), tunnelStart = $('#tunnelStart');
+  let aiTokenCache = '', aiFreshId = '', aiSelected = '';
   function fmtAIDate(iso) {
     if (!iso) return 'never';
     const d = new Date(iso);
     return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); return true; }
+      catch { return false; }
+      finally { ta.remove(); }
+    }
   }
   function renderAiStatus(s) {
     const on = !!s.enabled;
@@ -2267,22 +2346,41 @@
           ? (expired ? 'expired ' + fmtAIDate(t.expires) : 'expires ' + fmtAIDate(t.expires))
           : 'never expires';
         return `
-        <li class="ai-token-item${t.revoked ? ' ai-item-revoked' : ''}">
+        <li class="ai-token-item${t.revoked ? ' ai-item-revoked' : ''}${t.id === aiSelected ? ' selected' : ''}" data-id="${esc(t.id)}" role="button" tabindex="0" aria-selected="${t.id === aiSelected}" title="Click to select">
           <code class="ai-token-id">${esc(t.id)}&#8226;&#8226;&#8226;&#8226;</code>
           <span class="ai-token-meta">
             <span class="ai-token-created">created ${fmtAIDate(t.created)}</span>
             <span class="ai-token-exp${expired && !t.revoked ? ' ai-exp-late' : ''}">${esc(expLabel)}</span>
           </span>
           <span class="ai-badge ai-badge-${st[0]}">${st[1]}</span>
-          ${(!t.revoked && !expired) ? `<button class="btn btn-ghost btn-sm ai-revoke" data-id="${esc(t.id)}">Revoke</button>` : ''}
         </li>`;
       }).join('');
+      const sel = tokens.find(t => t.id === aiSelected);
+      aiTokenActions.hidden = !sel;
+      if (sel) {
+        aiSelectedLabel.textContent = sel.id + '••••';
+        aiTokenRevokeSel.disabled = sel.revoked || (sel.expires && new Date(sel.expires).getTime() < Date.now());
+      }
+    }
+  }
+  async function refreshTunnel() {
+    try {
+      const t = await api('/api/tunnel');
+      tunnelTag.className = 'ai-tag' + (t.running ? ' on' : '');
+      tunnelTag.textContent = t.running ? 'on' : 'off';
+      tunnelBody.hidden = !t.running;
+      tunnelStartWrap.hidden = t.running;
+      if (t.running && t.url) tunnelUrl.textContent = t.url;
+    } catch (e) {
+      tunnelTag.className = 'ai-tag err';
+      tunnelTag.textContent = 'err';
     }
   }
   aiBtn.addEventListener('click', async () => {
     aiModal.classList.add('open');
     try {
       renderAiStatus(await api('/api/ai/status'));
+      refreshTunnel();
     } catch (e) {
       notify('AI status failed: ' + esc(e.message), 'err');
     }
@@ -2290,10 +2388,15 @@
   aiModal.addEventListener('click', (ev) => {
     if (ev.target === aiModal) aiModal.classList.remove('open');
   });
+  aiTtlSeg.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.ai-ttl-btn');
+    if (!btn) return;
+    aiTtlSeg.querySelectorAll('.ai-ttl-btn').forEach(b => b.classList.toggle('active', b === btn));
+  });
   aiGenerate.addEventListener('click', async () => {
     aiGenerate.classList.add('btn-busy');
     try {
-      const days = parseInt(aiTtl.value, 10);
+      const days = parseInt(aiTtlSeg.querySelector('.ai-ttl-btn.active').dataset.days, 10);
       const j = await api('/api/ai/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2316,31 +2419,81 @@
   });
   aiCopyToken.addEventListener('click', async () => {
     if (!aiTokenCache) return;
-    try {
-      await navigator.clipboard.writeText(aiTokenCache);
+    if (await copyText(aiTokenCache)) {
       aiCopyToken.classList.add('copied');
       setTimeout(() => aiCopyToken.classList.remove('copied'), 800);
       notify('Token copied to clipboard');
+    } else {
+      notify('Copy failed', 'err');
+    }
+  });
+  aiTokenList.addEventListener('click', (ev) => {
+    const li = ev.target.closest('.ai-token-item');
+    if (!li) return;
+    aiSelected = li.dataset.id;
+    aiTokenList.querySelectorAll('.ai-token-item').forEach(x => x.classList.toggle('selected', x === li));
+    const sel = aiTokenListWrap.querySelector('.ai-token-item.selected');
+    const s = sel ? sel.dataset.id : '';
+    aiTokenActions.hidden = !s;
+    if (s) aiSelectedLabel.textContent = s + '••••';
+  });
+  aiTokenCopySel.addEventListener('click', async () => {
+    try {
+      const j = await api('/api/ai/token?id=' + encodeURIComponent(aiSelected));
+      if (await copyText(j.token)) {
+        aiTokenCopySel.classList.add('copied');
+        setTimeout(() => aiTokenCopySel.classList.remove('copied'), 800);
+        notify('Token copied to clipboard');
+      }
     } catch (e) {
       notify('Copy failed: ' + esc(e.message), 'err');
     }
   });
-  aiTokenList.addEventListener('click', async (ev) => {
-    const btn = ev.target.closest('.ai-revoke');
-    if (!btn) return;
-    btn.classList.add('btn-busy');
+  aiTokenRevokeSel.addEventListener('click', async () => {
+    aiTokenRevokeSel.classList.add('btn-busy');
     try {
-      await api('/api/ai/token?id=' + encodeURIComponent(btn.dataset.id), { method: 'DELETE' });
-      if (btn.dataset.id === aiFreshId) {
+      await api('/api/ai/token?id=' + encodeURIComponent(aiSelected), { method: 'DELETE' });
+      if (aiSelected === aiFreshId) {
         aiTokenCache = '';
         aiFreshId = '';
         aiFresh.hidden = true;
       }
+      aiSelected = '';
+      aiTokenActions.hidden = true;
       notify('Token deleted - it is gone for good');
       renderAiStatus(await api('/api/ai/status'));
     } catch (e) {
-      notify('Revoke failed: ' + esc(e.message), 'err');
-      btn.classList.remove('btn-busy');
+      notify('Delete failed: ' + esc(e.message), 'err');
+      aiTokenRevokeSel.classList.remove('btn-busy');
+    }
+  });
+  tunnelStart.addEventListener('click', async () => {
+    tunnelStart.classList.add('btn-busy');
+    try {
+      const t = await api('/api/tunnel/start', { method: 'POST' });
+      tunnelUrl.textContent = t.url;
+      notify('Tunnel started - give this URL to your AI');
+      refreshTunnel();
+    } catch (e) {
+      notify('Tunnel failed: ' + esc(e.message), 'err');
+    } finally {
+      tunnelStart.classList.remove('btn-busy');
+    }
+  });
+  tunnelStop.addEventListener('click', async () => {
+    try {
+      await api('/api/tunnel/stop', { method: 'POST' });
+      notify('Tunnel stopped');
+      refreshTunnel();
+    } catch (e) {
+      notify('Stop failed: ' + esc(e.message), 'err');
+    }
+  });
+  tunnelCopyUrl.addEventListener('click', async () => {
+    if (await copyText(tunnelUrl.textContent)) {
+      tunnelCopyUrl.classList.add('copied');
+      setTimeout(() => tunnelCopyUrl.classList.remove('copied'), 800);
+      notify('Tunnel URL copied');
     }
   });
 
@@ -2403,6 +2556,7 @@
     const on = fReveal.dataset.on === '1';
     fVal.type = on ? 'password' : 'text';
     fReveal.dataset.on = on ? '' : '1';
+    fReveal.innerHTML = on ? ICON_EYE_OFF : ICON_EYE;
     if (on) updateStrength(fStrengthMeter, fStrengthBar, fStrengthLabel, fStrengthText, fVal.value);
     else { fStrengthMeter.dataset.show = '0'; fStrengthLabel.hidden = true; }
   });
@@ -2410,6 +2564,7 @@
     const on = fEnvReveal.dataset.on === '1';
     fEnvVal.type = on ? 'password' : 'text';
     fEnvReveal.dataset.on = on ? '' : '1';
+    fEnvReveal.innerHTML = on ? ICON_EYE_OFF : ICON_EYE;
     if (on) updateStrength(fEnvStrengthMeter, fEnvStrengthBar, fEnvStrengthLabel, fEnvStrengthText, fEnvVal.value);
     else { fEnvStrengthMeter.dataset.show = '0'; fEnvStrengthLabel.hidden = true; }
   });
@@ -2426,6 +2581,7 @@
     fVal.value = genPassword();
     fVal.type = 'text';
     fReveal.dataset.on = '1';
+    fReveal.innerHTML = ICON_EYE;
     updateStrength(fStrengthMeter, fStrengthBar, fStrengthLabel, fStrengthText, fVal.value);
     notify('Generated a 20-character password - copy it somewhere safe');
   });
@@ -2433,6 +2589,7 @@
     fEnvVal.value = genPassword();
     fEnvVal.type = 'text';
     fEnvReveal.dataset.on = '1';
+    fEnvReveal.innerHTML = ICON_EYE;
     updateStrength(fEnvStrengthMeter, fEnvStrengthBar, fEnvStrengthLabel, fEnvStrengthText, fEnvVal.value);
     notify('Generated a 20-character random value');
   });

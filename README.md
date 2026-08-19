@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
-[![Version](https://img.shields.io/badge/version-3.1.2-34d399)](#)
+[![Version](https://img.shields.io/badge/version-3.2.0-34d399)](#)
 
 ---
 
@@ -243,23 +243,25 @@ vault.exe --lan
 
 ### Exposing to a cloud AI (tunnel)
 
-To let a web/cloud AI (with code execution) reach the vault, put it behind an HTTPS tunnel and tell the vault to accept the tunnel's hostname:
+The vault has a one-click HTTPS tunnel built in. In the AI Access panel, hit **Start tunnel**, copy the URL, and give it to your AI together with a generated token. The tunnel's hostname is allowed automatically - no restart needed:
 
 ```bash
-# 1. tunnel port 7575 to a public HTTPS URL (cloudflared example)
+# manual alternative, if you want to run cloudflared yourself
 cloudflared tunnel --url http://localhost:7575
 #    -> https://random-name.trycloudflare.com
-
-# 2. restart the vault, allowing that hostname (comma-separated for several)
+#    then restart the vault, allowing that hostname (comma-separated for several)
 set VAULT_ALLOW_HOSTS=random-name.trycloudflare.com
 vault.exe --lan
+```
 
-# 3. give the AI the public URL + a bearer token (AI Access -> Generate):
+Example calls from the AI side (AI Access -> Generate for a token):
+
+```bash
 curl -H "Authorization: Bearer TOKEN" https://random-name.trycloudflare.com/api/ai/list
 curl -H "Authorization: Bearer TOKEN" "https://random-name.trycloudflare.com/api/ai/read?name=Github"
 ```
 
-The token still gates every read (expiry + rate limit + per-token revoke). The tunnel provides TLS, so the token is encrypted in transit. Revoke the token in the UI when done.
+The token still gates every read (expiry + rate limit + per-token revoke). The tunnel provides TLS, so the token is encrypted in transit. Delete the token in the UI when done.
 
 ---
 

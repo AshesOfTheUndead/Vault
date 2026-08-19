@@ -33,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "3.1.2"
+	version     = "3.2.0"
 )
 
 var (
@@ -381,6 +381,104 @@ func aiActiveCount(tokens []AIToken) int {
 		n++
 	}
 	return n
+}
+
+/* ---------- tunnel (one-click HTTPS access for cloud AIs) ---------- */
+
+var tunnelUrlRegex = regexp.MustCompile(`https://[a-z0-9-]+\.trycloudflare\.com`)
+
+var (
+	tunnelMu      sync.Mutex
+	tunnelCmd     *exec.Cmd
+	tunnelProc    *os.Process
+	tunnelURL     string
+	tunnelStarted time.Time
+)
+
+// cloudflaredPath locates the cloudflared binary: VAULT_CLOUDFLARED env var,
+// else next to the vault executable, else on PATH.
+func cloudflaredPath() string {
+	if p := os.Getenv("VAULT_CLOUDFLARED"); p != "" {
+		return p
+	}
+	if runtime.GOOS == "windows" {
+		if exe, err := os.Executable(); err == nil {
+			p := filepath.Join(filepath.Dir(exe), "cloudflared.exe")
+			if _, err := os.Stat(p); err == nil {
+				return p
+			}
+		}
+	}
+	if p, err := exec.LookPath("cloudflared"); err == nil {
+		return p
+	}
+	return "cloudflared"
+}
+
+// startTunnel launches a Cloudflare quick tunnel to the vault and auto-allows
+// the reported hostname through the Host allowlist so no manual config is needed.
+func startTunnel(port int) (string, error) {
+	tunnelMu.Lock()
+	defer tunnelMu.Unlock()
+	if tunnelCmd != nil {
+		return tunnelURL, nil
+	}
+	bin := cloudflaredPath()
+	logFile := filepath.Join(vaultDir, "tunnel.log")
+	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		return "", err
+	}
+	cmd := exec.Command(bin, "tunnel", "--url", fmt.Sprintf("http://127.0.0.1:%d", port), "--no-autoupdate")
+	cmd.Stdout = f
+	cmd.Stderr = f
+	if err := cmd.Start(); err != nil {
+		f.Close()
+		return "", fmt.Errorf("could not start cloudflared: %w", err)
+	}
+	tunnelCmd = cmd
+	tunnelProc = cmd.Process
+	tunnelStarted = time.Now()
+	go func() {
+		cmd.Wait()
+		tunnelMu.Lock()
+		tunnelCmd = nil
+		tunnelProc = nil
+		tunnelURL = ""
+		tunnelMu.Unlock()
+		f.Close()
+	}()
+	deadline := time.Now().Add(30 * time.Second)
+	for time.Now().Before(deadline) {
+		if b, err := os.ReadFile(logFile); err == nil {
+			if m := tunnelUrlRegex.Find(b); m != nil {
+				u, perr := url.Parse(string(m))
+				if perr == nil && u.Host != "" {
+					tunnelURL = "https://" + u.Host
+					addAllowedHosts(u.Host)
+					return tunnelURL, nil
+				}
+			}
+		}
+		time.Sleep(300 * time.Millisecond)
+	}
+	return "", fmt.Errorf("tunnel did not become ready in 30s (see %s)", logFile)
+}
+
+func stopTunnel() error {
+	tunnelMu.Lock()
+	defer tunnelMu.Unlock()
+	if tunnelCmd == nil {
+		return nil
+	}
+	proc := tunnelProc
+	tunnelCmd = nil
+	tunnelProc = nil
+	tunnelURL = ""
+	if proc != nil {
+		return proc.Kill()
+	}
+	return nil
 }
 
 func clientIP(r *http.Request) string {
@@ -1363,6 +1461,23 @@ func main() {
 
 	mux.HandleFunc("/api/ai/token", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
+		case "GET":
+			// re-show a generated token (UI-only, origin-checked): the UI
+			// stores no token values, so the full value is fetched on demand
+			id := strings.TrimSpace(r.URL.Query().Get("id"))
+			tokensMu.Lock()
+			tokens := loadAITokens()
+			tokensMu.Unlock()
+			for _, t := range tokens {
+				if t.ID == id {
+					sendJSON(w, 200, map[string]interface{}{
+						"id": t.ID, "token": t.Token,
+						"created": t.Created, "expires": t.Expires,
+					})
+					return
+				}
+			}
+			sendJSON(w, 404, map[string]string{"error": "token not found"})
 		case "POST":
 			var req struct {
 				Days int `json:"days"`
@@ -1505,6 +1620,47 @@ func main() {
 		sendJSON(w, 404, map[string]string{"error": "not found"})
 	})
 
+	/* tunnel: one-click HTTPS access for cloud AIs (UI only, browser origin-checked) */
+	mux.HandleFunc("/api/tunnel", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		tunnelMu.Lock()
+		u, started := tunnelURL, tunnelStarted
+		running := tunnelCmd != nil
+		tunnelMu.Unlock()
+		sendJSON(w, 200, map[string]interface{}{
+			"running": running,
+			"url":     u,
+			"started": started.Format(time.RFC3339),
+		})
+	})
+
+	mux.HandleFunc("/api/tunnel/start", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		u, err := startTunnel(port)
+		if err != nil {
+			sendJSON(w, 500, map[string]string{"error": err.Error()})
+			return
+		}
+		log.Printf("tunnel: started %s", u)
+		sendJSON(w, 200, map[string]interface{}{"running": true, "url": u})
+	})
+
+	mux.HandleFunc("/api/tunnel/stop", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		stopTunnel()
+		log.Printf("tunnel: stopped")
+		sendJSON(w, 200, map[string]string{"ok": "true"})
+	})
+
 	/* stats */
 	mux.HandleFunc("/api/stats", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
@@ -1563,6 +1719,7 @@ func main() {
 		<-sigChan
 		fmt.Println()
 		log.Printf("shutting down...")
+		stopTunnel()
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		srv.Shutdown(ctx)
