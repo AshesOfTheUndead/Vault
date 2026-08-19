@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/subtle"
 	_ "embed"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -30,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "2.4.0"
+	version     = "2.5.0"
 )
 
 var (
@@ -229,6 +232,86 @@ func deleteValue(name string) error {
 		return nil
 	}
 	return os.RemoveAll(dir)
+}
+
+/* ---------- AI access API (token-protected read for AI tools / scripts) ---------- */
+
+func aiTokenFile() string {
+	return filepath.Join(vaultDir, "ai.token")
+}
+
+func loadAIToken() (string, bool) {
+	b, err := os.ReadFile(aiTokenFile())
+	if err != nil {
+		return "", false
+	}
+	tok := strings.TrimSpace(string(b))
+	if len(tok) < 16 {
+		return "", false
+	}
+	return tok, true
+}
+
+func generateAIToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+func revokeAIToken() {
+	os.Remove(aiTokenFile())
+}
+
+func aiBearerOK(r *http.Request) bool {
+	tok, ok := loadAIToken()
+	if !ok {
+		return false
+	}
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return false
+	}
+	got := strings.TrimPrefix(auth, "Bearer ")
+	return subtle.ConstantTimeCompare([]byte(got), []byte(tok)) == 1
+}
+
+func clientIP(r *http.Request) string {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
+}
+
+// aiRateLimit is a tiny in-memory per-IP limiter so a leaked token can't be
+// hammered. 60 requests / minute per IP is generous for AI tools, stingy for
+// a scraper.
+type aiRateLimit struct {
+	mu   sync.Mutex
+	hits map[string][]int64
+}
+
+var aiLimiter = &aiRateLimit{hits: map[string][]int64{}}
+
+func (l *aiRateLimit) allow(ip string, max int, window time.Duration) bool {
+	now := time.Now().Unix()
+	cut := now - int64(window/time.Second)
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	kept := l.hits[ip][:0]
+	for _, h := range l.hits[ip] {
+		if h > cut {
+			kept = append(kept, h)
+		}
+	}
+	if len(kept) >= max {
+		l.hits[ip] = kept
+		return false
+	}
+	l.hits[ip] = append(kept, now)
+	return true
 }
 
 /* ---------- env vars ---------- */
@@ -1043,6 +1126,112 @@ func main() {
 		w.Header().Set("Content-Disposition", `attachment; filename="vault-backup.json"`)
 		w.Header().Set("Cache-Control", "no-store")
 		json.NewEncoder(w).Encode(bf)
+	})
+
+	/* AI access: manage the read token (UI only, browser origin-checked) */
+	mux.HandleFunc("/api/ai/status", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		_, has := loadAIToken()
+		sendJSON(w, 200, map[string]interface{}{
+			"enabled":  has,
+			"hasToken": has,
+		})
+	})
+
+	mux.HandleFunc("/api/ai/token", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "POST":
+			tok, err := generateAIToken()
+			if err != nil {
+				sendJSON(w, 500, map[string]string{"error": "could not generate token"})
+				return
+			}
+			if err := atomicWriteFile(aiTokenFile(), []byte(tok)); err != nil {
+				sendJSON(w, 500, map[string]string{"error": "could not save token"})
+				return
+			}
+			log.Printf("ai-access: token generated/rotated")
+			sendJSON(w, 200, map[string]string{"token": tok})
+		case "DELETE":
+			revokeAIToken()
+			log.Printf("ai-access: token revoked")
+			sendJSON(w, 200, map[string]string{"ok": "true"})
+		default:
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+		}
+	})
+
+	/* AI access: token-protected read endpoints (no Origin needed, works from curl / AI tools) */
+	mux.HandleFunc("/api/ai/list", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		if !aiBearerOK(r) {
+			sendJSON(w, 401, map[string]string{"error": "unauthorized"})
+			return
+		}
+		if !aiLimiter.allow(clientIP(r), 60, time.Minute) {
+			sendJSON(w, 429, map[string]string{"error": "rate limited"})
+			return
+		}
+		writeMu.Lock()
+		secrets := listEntries()
+		envVars := listEnvVars()
+		writeMu.Unlock()
+		type aiEntry struct {
+			Name string `json:"name"`
+			Kind string `json:"kind"`
+		}
+		entries := make([]aiEntry, 0, len(secrets)+len(envVars))
+		for _, s := range secrets {
+			entries = append(entries, aiEntry{Name: s.Name, Kind: "secret"})
+		}
+		for _, e := range envVars {
+			entries = append(entries, aiEntry{Name: e.Key, Kind: "env"})
+		}
+		sendJSON(w, 200, map[string]interface{}{"entries": entries})
+	})
+
+	mux.HandleFunc("/api/ai/read", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		if !aiBearerOK(r) {
+			sendJSON(w, 401, map[string]string{"error": "unauthorized"})
+			return
+		}
+		if !aiLimiter.allow(clientIP(r), 60, time.Minute) {
+			sendJSON(w, 429, map[string]string{"error": "rate limited"})
+			return
+		}
+		name := strings.TrimSpace(r.URL.Query().Get("name"))
+		if name == "" {
+			sendJSON(w, 400, map[string]string{"error": "name is required"})
+			return
+		}
+		writeMu.Lock()
+		v, ok := readValue(name)
+		if ok {
+			d, _ := readDetails(name)
+			writeMu.Unlock()
+			log.Printf("ai-access: read secret %q from %s", name, clientIP(r))
+			sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "secret", "value": v, "details": d})
+			return
+		}
+		ev, _, ok2 := readEnvVar(name)
+		if ok2 {
+			writeMu.Unlock()
+			log.Printf("ai-access: read env var %q from %s", name, clientIP(r))
+			sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "env", "value": ev})
+			return
+		}
+		writeMu.Unlock()
+		sendJSON(w, 404, map[string]string{"error": "not found"})
 	})
 
 	/* stats */

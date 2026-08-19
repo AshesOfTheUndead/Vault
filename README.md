@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
 
-**What it does**: stores two kinds of things for you - **Secrets** (passwords, tokens, API keys) and **Env Vars** (key/value pairs with a secret toggle). You manage them in a browser UI at `http://127.0.0.1:7575`, or straight from a terminal with `curl`. Terminal AIs can read it too, which is the whole point: no auth gate, no token to configure.
+**What it does**: stores two kinds of things for you - **Secrets** (passwords, tokens, API keys) and **Env Vars** (key/value pairs with a secret toggle). You manage them in a browser UI at `http://127.0.0.1:7575`, or straight from a terminal with `curl`. For AI tools, generate a token in the UI and read any secret with one `curl` call.
 
 ---
 
@@ -37,6 +37,7 @@
 - **Password generator** - one click fills a strong 20-character random password in any editor
 - **Smarter search** - the filter matches details (secrets) and values (env vars), not just names
 - **Command palette copy** - Shift+Enter in the palette copies the selected item's value straight to your clipboard
+- **AI access** - generate a token and let Claude, Codex, Cursor, or any script read secrets via a small REST API
 - **Graceful shutdown** - Ctrl+C cleanly shuts down the HTTP server
 
 ---
@@ -115,6 +116,26 @@ curl http://192.168.1.5:7575/api/health
 
 ---
 
+## 🤖 AI Access
+
+AI tools (Claude Code, Codex, Cursor, any script) can read your secrets over HTTP. Reads are protected by a token you generate in the UI:
+
+1. Click the **AI** button in the toolbar
+2. **Generate token** - copy it somewhere safe (it is shown only once)
+3. Use it with any AI tool or terminal:
+
+```bash
+# list everything the vault knows about
+curl -H "Authorization: Bearer TOKEN" http://127.0.0.1:7575/api/ai/list
+
+# read one secret or env var
+curl -H "Authorization: Bearer TOKEN" "http://127.0.0.1:7575/api/ai/read?name=Github%20Token"
+```
+
+The token is a master key: anyone holding it can read every value, so treat it like a password. Rotate or revoke it anytime from the same panel. Requests are rate-limited per IP (60/min) and every read is logged to the vault's console output.
+
+---
+
 ## ⌨️ Keyboard Shortcuts
 
 | Key | Action |
@@ -165,6 +186,11 @@ All endpoints are JSON over HTTP on `127.0.0.1:7575`.
 | `GET`  | `/api/stats` | Stats (counts, total size, uptime) |
 | `GET`  | `/api/version` | Version (go version, platform, port) |
 | `GET`  | `/api/backup` | Download everything as one JSON file (attachment) |
+| `GET`  | `/api/ai/status` | AI access status (enabled or not) |
+| `POST` | `/api/ai/token` | Generate / rotate the AI access token |
+| `DELETE` | `/api/ai/token` | Revoke the AI access token |
+| `GET`  | `/api/ai/list` | List secret + env var names (requires `Authorization: Bearer TOKEN`) |
+| `GET`  | `/api/ai/read` | Read one value: `?name=X` (requires `Authorization: Bearer TOKEN`) |
 
 ### Examples
 

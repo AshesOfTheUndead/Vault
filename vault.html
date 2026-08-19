@@ -393,6 +393,7 @@
   }
   .btn:hover::before { left: 100%; }
   .btn:active { transform: scale(0.97); }
+  .btn:not(:disabled):hover:not(:active) { transform: translateY(-1px); }
   .btn svg { width: 13px; height: 13px; }
   .btn-sm { padding: 8px 12px; font-size: 10.5px; }
   .btn-primary {
@@ -1020,6 +1021,34 @@
     .bg-scanlines, .bg-sweep, #matrix-canvas { display: none; }
     body::before { display: none; }
   }
+
+  .ai-modal { width: min(560px, calc(100vw - 32px)); }
+  .ai-status { display: flex; justify-content: center; margin: 18px 0 14px; }
+  .ai-pill {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 7px 16px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2);
+  }
+  .ai-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-mute); }
+  .ai-pill.ai-on { color: var(--accent-hi); border-color: rgba(52, 211, 153, 0.4); box-shadow: 0 0 16px rgba(52, 211, 153, 0.15); }
+  .ai-pill.ai-on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: ledPing 2s var(--ease-out) infinite; }
+  .ai-token-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 4px; }
+  .ai-token {
+    font-family: var(--mono); font-size: 11px; color: var(--accent-hi);
+    background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25);
+    padding: 7px 12px; border-radius: var(--r);
+    word-break: break-all; max-width: 340px; line-height: 1.5;
+  }
+  .ai-example {
+    margin: 14px 0 0; text-align: left; justify-content: flex-start;
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.8;
+  }
+  .ai-example code {
+    color: var(--accent-hi); background: rgba(52, 211, 153, 0.06);
+    padding: 1px 5px; border-radius: 4px; word-break: break-all;
+  }
 </style>
 </head>
 <body>
@@ -1038,7 +1067,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.4</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.5</span>
         </h1>
       </div>
       <p class="tag">
@@ -1079,7 +1108,7 @@
         <span class="tab-indicator" id="tabIndicator"></span>
       </div>
       <div class="search">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="q" type="text" placeholder="grep…" autocomplete="off" spellcheck="false">
         <span class="kbd">/</span>
       </div>
@@ -1095,11 +1124,15 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
         Backup
       </button>
+      <button class="btn btn-ghost btn-sm" id="aiBtn" title="Let AI tools read secrets (token-protected API)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M22 9h-2M2 9h2"/></svg>
+        AI
+      </button>
       <button class="btn btn-ghost btn-sm" id="helpBtn" title="Keyboard shortcuts (?)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </button>
       <button class="btn btn-primary" id="newBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         <span id="newBtnLabel">New secret</span>
       </button>
       <input type="file" id="envFileInput" accept=".env,.txt,text/plain" hidden>
@@ -1115,7 +1148,7 @@
           <span class="spacer"></span>
           <span class="meta" id="editWho"></span>
           <button class="icon-btn" id="editClose" title="Close (Esc)" aria-label="Close editor">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
         <form class="form" id="editForm">
@@ -1160,7 +1193,7 @@
           <span class="spacer"></span>
           <span class="meta" id="envEditWho"></span>
           <button class="icon-btn" id="envEditClose" title="Close (Esc)" aria-label="Close editor">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
         <form class="form" id="envEditForm">
@@ -1281,11 +1314,29 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="aiModal" role="dialog" aria-modal="true" aria-labelledby="aiTitle">
+  <div class="modal ai-modal">
+    <h2 id="aiTitle">AI Access</h2>
+    <p>Let AI tools and scripts read your secrets through a token-protected API. The token is a master key: anyone holding it can read every value.</p>
+    <div class="ai-status" id="aiStatus"></div>
+    <div class="ai-token-row" id="aiTokenRow" hidden>
+      <code class="ai-token" id="aiTokenValue"></code>
+      <button class="btn btn-ghost btn-sm" id="aiCopyToken">Copy</button>
+    </div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="btn btn-ghost" id="aiRevoke" hidden>Revoke</button>
+      <button class="btn btn-primary" id="aiGenerate" style="flex: 1;">Generate token</button>
+    </div>
+    <p class="ai-example">List: <code>curl -H "Authorization: Bearer TOKEN" http://localhost:7575/api/ai/list</code></p>
+    <p class="ai-example">Read: <code>curl -H "Authorization: Bearer TOKEN" "http://localhost:7575/api/ai/read?name=MySecret"</code></p>
+  </div>
+</div>
+
 <!-- command palette -->
 <div class="cmd-backdrop" id="cmdBackdrop" role="dialog" aria-modal="true" aria-label="Command palette">
   <div class="cmd-modal" role="combobox" aria-expanded="true">
     <div class="cmd-input-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input class="cmd-input" id="cmdInput" type="text" placeholder="Search secrets, env vars, or actions…" autocomplete="off" spellcheck="false">
       <span class="cmd-kbd">ESC</span>
     </div>
@@ -1339,8 +1390,8 @@
     const t = document.createElement('div');
     t.className = 'toast ' + kind;
     const ic = kind === 'err'
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
     const undoHtml = opts.undo ? `<button class="toast-undo" id="${opts.undoId}">Undo</button>` : '';
     t.innerHTML = `
       <div class="toast-ic">${ic}</div>
@@ -1615,8 +1666,8 @@
   }
   function emptyState(kind, message, hint) {
     const ic = kind === 'env'
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
     return `<li class="empty" style="display:flex;list-style:none;">
       <span class="lock-ic">${ic}</span>
       <p>${message}</p>
@@ -1654,7 +1705,7 @@
   function copyFlash(btn) {
     if (!btn) return;
     const orig = btn.innerHTML;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
     btn.classList.add('copied');
     setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 900);
   }
@@ -1769,6 +1820,69 @@
   helpClose.addEventListener('click', () => helpModal.classList.remove('open'));
   helpModal.addEventListener('click', (ev) => {
     if (ev.target === helpModal) helpModal.classList.remove('open');
+  });
+
+  // AI access panel
+  const aiModal = $('#aiModal'), aiStatus = $('#aiStatus'), aiTokenRow = $('#aiTokenRow');
+  const aiTokenValue = $('#aiTokenValue'), aiCopyToken = $('#aiCopyToken');
+  const aiGenerate = $('#aiGenerate'), aiRevoke = $('#aiRevoke');
+  let aiTokenCache = '';
+  function renderAiStatus(s) {
+    const pill = document.createElement('span');
+    pill.className = 'ai-pill ' + (s.enabled ? 'ai-on' : 'ai-off');
+    pill.innerHTML = '<i></i>' + (s.enabled ? 'Enabled' : 'Disabled');
+    aiStatus.replaceChildren(pill);
+    aiTokenRow.hidden = !s.enabled;
+    aiRevoke.hidden = !s.enabled;
+    aiGenerate.textContent = s.enabled ? 'Rotate token' : 'Generate token';
+  }
+  aiBtn.addEventListener('click', async () => {
+    aiModal.classList.add('open');
+    try {
+      renderAiStatus(await api('/api/ai/status'));
+    } catch (e) {
+      notify('AI status failed: ' + esc(e.message), 'err');
+    }
+  });
+  aiModal.addEventListener('click', (ev) => {
+    if (ev.target === aiModal) aiModal.classList.remove('open');
+  });
+  aiGenerate.addEventListener('click', async () => {
+    aiGenerate.classList.add('btn-busy');
+    try {
+      const j = await api('/api/ai/token', { method: 'POST' });
+      aiTokenCache = j.token;
+      aiTokenValue.textContent = j.token;
+      aiTokenRow.hidden = false;
+      aiRevoke.hidden = false;
+      aiGenerate.textContent = 'Rotate token';
+      notify('Token generated - copy it now, it is shown only once');
+    } catch (e) {
+      notify('Generate failed: ' + esc(e.message), 'err');
+    } finally {
+      aiGenerate.classList.remove('btn-busy');
+    }
+  });
+  aiCopyToken.addEventListener('click', async () => {
+    if (!aiTokenCache) return;
+    try {
+      await navigator.clipboard.writeText(aiTokenCache);
+      aiCopyToken.classList.add('copied');
+      setTimeout(() => aiCopyToken.classList.remove('copied'), 800);
+      notify('Token copied to clipboard');
+    } catch (e) {
+      notify('Copy failed: ' + esc(e.message), 'err');
+    }
+  });
+  aiRevoke.addEventListener('click', async () => {
+    try {
+      await api('/api/ai/token', { method: 'DELETE' });
+      aiTokenCache = '';
+      renderAiStatus({ enabled: false });
+      notify('Token revoked - AI access is now disabled');
+    } catch (e) {
+      notify('Revoke failed: ' + esc(e.message), 'err');
+    }
   });
 
   $('#newBtn').addEventListener('click', () => {
@@ -1921,6 +2035,7 @@
     if (ev.key === 'Escape') {
       if (cmdBackdrop.classList.contains('open')) { closeCmdPalette(); return; }
       if (helpModal.classList.contains('open')) { helpModal.classList.remove('open'); return; }
+      if (aiModal.classList.contains('open')) { aiModal.classList.remove('open'); return; }
       if (confirmModal.classList.contains('open')) { hideConfirm(); return; }
       if (envEditor.classList.contains('open')) { closeEnvEditor(); return; }
       if (editor.classList.contains('open')) { closeEditor(); return; }
@@ -1937,7 +2052,7 @@
   function anyModalOpen() {
     return editor.classList.contains('open') || envEditor.classList.contains('open') ||
       confirmModal.classList.contains('open') || helpModal.classList.contains('open') ||
-      cmdBackdrop.classList.contains('open');
+      aiModal.classList.contains('open') || cmdBackdrop.classList.contains('open');
   }
 
   /* ---------- live connection status indicator ---------- */
