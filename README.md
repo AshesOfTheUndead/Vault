@@ -1,7 +1,8 @@
-﻿# 🔐 VAULT
+﻿# VAULT
 
-> Secure local secrets and environment variables, kept in plain sight.
-> A single self-contained binary. No runtime. No cloud. Just plaintext files on your machine.
+> A secret treasure box on your computer.
+> A tiny app that keeps your passwords, keys, and codes safe and easy to find.
+> One small file. No internet needed. No cloud. Your stuff stays on YOUR computer.
 
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00add8?logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
@@ -11,186 +12,288 @@
 
 ---
 
-## ✨ Features
+## What is this?
 
-- **Single binary** - Go binary with embedded HTML, no runtime dependencies
-- **Origin/Host check** - blocks cross-origin browser requests (the real attack against a localhost app); terminal AIs and curl keep working
-- **DNS-rebinding defense** - Host header allowlist (only loopback + LAN IPs in `--lan` mode)
-- **Strict security headers** - CSP, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-XSS-Protection`
-- **HTTP server timeouts** - Read/Write 30s, Idle 120s, MaxHeaderBytes 1MB (slowloris-resistant)
-- **AI access tokens** - generate 32-byte hex tokens that expire after 1, 7 or 30 days (or never), each shown with its exact expiry timestamp in the UI; constant-time compare, rate-limited 60 req/min per IP, per-token revoke
-- **Audit log** - every secret/env save/delete and every AI read is logged to `~/Vault/audit.log` with timestamp + source IP; viewable in the Access History modal
-- **LAN mode** (`--lan` or `--host 0.0.0.0`) - exposes vault on your local network so phones/Termux can reach it; auto-scans NIC IPs every 30s for DHCP/reconnect resilience
-- **Port takeover** - if port 7575 is in use, vault finds the process, kills it, and takes over
-- **Auto-open browser** - launches your default browser 800ms after startup
-- **Command palette** (Ctrl+K / Cmd+K) - fuzzy search across secrets, env vars, and actions; arrow-key navigation
-- **Live connection status indicator** - sys-chip LED turns green/amber/red based on API health
-- **Password strength meter** - real-time weak/fair/good/strong indicator below value fields
-- **Clipboard auto-clear** - copied secrets auto-clear from clipboard after 30 seconds
-- **Recently accessed** - last 6 accessed entries shown as quick-open chips above the list
-- **Two storage types**:
-  - **Secrets** - personal entries (name + value + details) for passwords, tokens, API keys
-  - **Env Vars** - Render-style environment variables with key/value/secret toggle
-- **Glass morphism UI** - premium dark hacker-terminal aesthetic with matrix rain, scanlines, and CRT vignette
-- **Smooth animations** - letter-by-letter brand reveal, count-up stats, staggered row entrances, smooth tab transitions
-- **Delete confirmation modal** - no accidental deletes
-- **Undo delete** - 5-second undo window via toast action button
-- **One-click backup** - download all secrets + env vars as a single JSON file
-- **`.env` import/export** - bulk import env vars from `.env` files, export back to `.env`
-- **Auto-mark sensitive** - keys like `PASSWORD`, `TOKEN`, `API_KEY` auto-marked as secret on import
-- **Atomic file writes** - write to temp file then rename, prevents corruption
-- **Request logging** - colorized per-request log (method, path, status, duration)
-- **Graceful shutdown** - Ctrl+C cleanly shuts down the HTTP server
-- **Auto-migration** - upgrades old flat-file format to new folder structure on first run
-- **4-second auto-refresh** - multi-tab sync via polling
-- **Keyboard shortcuts** - full keyboard navigation (`/`, `?`, `1`, `2`, `N`, `E`, `R`, `Ctrl+K`, `Ctrl+Enter`, `Esc`)
-- **Health, stats, version, and audit endpoints** - `/api/health`, `/api/stats`, `/api/version`, `/api/audit`
+Imagine a small box on your computer. Inside the box you can put little notes
+with words you do not want anyone else to see:
+
+- your game password
+- your secret key for a website
+- the code that lets your AI helper talk to your tools
+
+The box is called **VAULT**. You open it in your browser at
+`http://127.0.0.1:7575`. Only your computer can open it. It saves every note
+as a tiny text file in a folder named `Vault` in your home folder.
 
 ---
 
-## 🚀 Quick Start
+## FOR EVERYONE: How to use it (5 easy steps)
 
-### Option A: Download the binary
+### Step 1. Start the vault
 
-Pre-built binaries for all platforms are in the [Releases](../../releases) page:
+1. Download the file for your computer from the [Releases](../../releases) page:
+   - `vault.exe` for Windows
+   - `vault-linux-amd64` for Linux
+   - `vault-darwin-arm64` for Apple computers (Mac with M1/M2/M3)
+   - `vault-darwin-amd64` for older Macs (Intel)
+2. Put the file anywhere you like (your Desktop is fine).
+3. Double-click it.
+4. Your browser opens and shows the vault. If it does not, type this in the
+   address bar: `http://127.0.0.1:7575`
 
-| File | Platform |
-|------|----------|
-| `vault.exe` | Windows (amd64) |
-| `vault-linux-amd64` | Linux (amd64) |
-| `vault-darwin-amd64` | macOS (Intel) |
-| `vault-darwin-arm64` | macOS (Apple Silicon) |
+That is it. The vault is now open.
 
-1. Download the right binary for your OS
-2. Rename to `vault` (or `vault.exe` on Windows) if you like
-3. On macOS/Linux, mark as executable: `chmod +x vault-darwin-arm64`
-4. Double-click (or `./vault-darwin-arm64` in terminal)
-5. Browser opens to `http://127.0.0.1:7575`
+### Step 2. Put a secret inside
 
-### Option B: Build from source
+1. Click the **New secret** button (or press the `N` key).
+2. Give it a name. Example: `roblox` or `wifi_password`.
+3. Type the secret value. Example: your real password.
+4. (Optional) Add notes in the Details box. Example: `the password for my main account`.
+5. Click **Save secret** (or press `Ctrl+Enter`).
 
-```bash
-# requires Go 1.21+
-git clone https://github.com/AshesOfTheUndead/Vault.git
-cd vault
+Your secret now sits in the list. The vault hides it as dots, so someone
+looking over your shoulder cannot read it.
 
-# build for your current platform
-go build -o vault .
+### Step 3. Look at a secret
 
-# build for Windows from any platform
-GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o vault.exe .
+Click the **eye** button on the row of the secret. The dots turn back into the
+real words for a moment. Click the eye again to hide it. The little slashed eye
+means the secret is hidden.
 
-# run
-./vault           # linux/mac
-vault.exe         # windows
-```
+### Step 4. Copy a secret
 
-Or use the build scripts:
+Click the **copy** button on the row. The value goes to your clipboard, ready
+to paste. The vault wipes the clipboard after 30 seconds, so it cannot leak
+later.
 
-```bash
-./build.sh        # linux/mac
-build.bat         # windows
-```
+### Step 5. Remove a secret
 
-### CLI flags
-
-```
-vault.exe -port 8080           # use a different port
-vault.exe -version              # print version
-vault.exe -no-browser           # don't auto-open browser
-VAULT_ALLOW_HOSTS=api.example.com vault.exe --lan   # allow a tunnel/reverse-proxy hostname (comma-separated)
-```
+Click the **trash** button on the row. The vault asks "are you sure?" first,
+so you cannot delete by accident. If you delete by mistake, press **Undo**
+on the little message that appears - you have 5 seconds.
 
 ---
 
-## 📁 Storage Layout
+## Env Vars: special secrets for your apps
 
-Everything lives under `~/Vault/` (i.e. `C:\Users\<you>\Vault\` on Windows):
+The second tab, **Env Vars**, is for environment variables (programs use
+these to read settings like a database address).
+
+1. Click the **Env Vars** tab (or press `2`).
+2. Click **New env var** (or press `E`).
+3. Give it a big-name key. Example: `DATABASE_URL`.
+4. Type the value. Example: `postgres://user:pass@host/db`.
+5. Flip the **secret** switch if this value should be hidden with dots.
+6. Click **Save env var**.
+
+You can also:
+
+- **Import a `.env` file** - add many env vars at once. Vault automatically
+  marks keys like `PASSWORD`, `TOKEN`, and `API_KEY` as secret.
+- **Export as `.env`** - download all env vars as one file.
+
+## Gateways: groups of env vars
+
+A **gateway** is a named bundle of env vars that belong together. Example: a
+gateway named `stripe` with `STRIPE_KEY`, `WEBHOOK_SECRET`, and `MERCHANT_ID`.
+
+1. Click the **Gateways** tab (or press `3`).
+2. Click **New gateway** (or press `G`).
+3. Type a name, and press **Generate** if you want a ready-made random gateway
+   with sample variables. Edit the variables as you like.
+4. Click **Save gateway**.
+
+You can copy a gateway as a ready `.env` block anytime.
+
+---
+
+## Let your AI helper in (AI Access)
+
+You can let a web AI (like Qwen or ChatGPT with code execution) read your
+secrets. You give it two things: an **address** (the tunnel URL) and a
+**key** (the token). The AI can then read your secrets, and nothing else on
+your computer.
+
+### Step 1. Make a key (token)
+
+1. Click the robot button (AI Access) in the vault.
+2. Pick how long the key should work: 1 day, 7 days, 30 days, or never.
+3. Click **Generate token**.
+4. Copy the token - it is shown only once!
+
+### Step 2. Start the tunnel
+
+1. In the same window, click **Start tunnel**.
+2. Wait a few seconds. A public address appears, like
+   `https://funny-words.trycloudflare.com`.
+3. Click **Copy URL**.
+
+### Step 3. Give the AI the address and the key
+
+Paste both into your AI and tell it to use them like this:
+
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" https://funny-words.trycloudflare.com/api/ai/list
+curl -H "Authorization: Bearer YOUR_TOKEN" "https://funny-words.trycloudflare.com/api/ai/read?name=roblox"
+```
+
+The tunnel address is safe: without the token, nobody can read anything.
+
+### Step 4. Take the key away when you are done
+
+Open AI Access, click the token row, and press **Delete**. The AI loses access
+immediately. Tokens are also deleted automatically when they expire.
+
+---
+
+## What if something goes wrong?
+
+| Problem | Fix |
+|---------|-----|
+| The page will not open | Make sure `vault.exe` is running (double-click it again) and the address is `http://127.0.0.1:7575` |
+| The page says "v4.0.1" but nothing else | Wait 2 seconds - the vault loads itself automatically |
+| I forgot my secret | Secrets are saved as plain text files in `~/Vault/Secrets/<name>/value.txt` - you can open the file directly |
+| The tunnel says "off" | Click **Start tunnel** again. Restarting the vault stops the tunnel |
+| The AI says "401" | The token is wrong or expired. Generate a new one |
+| The AI says "403" | The tunnel URL changed. Copy the new URL from AI Access |
+
+---
+
+## All the buttons and keys
+
+| Key | What it does |
+|-----|--------------|
+| `/` | Jump to the search box |
+| `?` | Show this help |
+| `1` | Go to Secrets |
+| `2` | Go to Env Vars |
+| `3` | Go to Gateways |
+| `N` | New secret |
+| `E` | New env var |
+| `G` | New gateway |
+| `R` | Refresh everything |
+| `Ctrl+K` (or `Cmd+K`) | Open the command palette (type to find anything) |
+| `Ctrl+Enter` | Save what you are editing |
+| `Esc` | Close the window / back out |
+
+---
+
+## Where does vault keep your stuff?
+
+Everything lives in a folder called `Vault` in your home folder
+(`C:\Users\YOU\Vault` on Windows, `~/Vault` on Mac/Linux):
 
 ```
 ~/Vault/
-├── Secrets/                    # personal secrets
-│   ├── roblox/
-│   │   ├── value.txt           # the secret value
-│   │   ├── details.txt         # optional notes
-│   │   └── name.txt            # original name (case-preserved)
-│   └── github_token/
-│       └── ...
-└── EnvVars/                    # environment variables
-    ├── DATABASE_URL/
-    │   ├── value.txt
-    │   ├── secret.txt          # "true" or "false"
-    │   └── key.txt
-    └── PORT/
-        └── ...
+Secrets/
+  roblox/
+    value.txt      <- the secret value
+    details.txt    <- optional notes
+    name.txt       <- the name (spelled exactly as you typed it)
+  github_token/
+EnvVars/
+  DATABASE_URL/
+    key.txt
+    value.txt
+    secret.txt     <- "true" or "false"
+Gateways/
+  stripe/
+    meta.json      <- name, type, description
+    vars.json      <- the key-value pairs
+audit.log          <- who read what, and when
+ai.tokens.json     <- your AI tokens
 ```
 
-Nothing is encrypted - by design. Delete a folder to delete an entry. Edit files directly if you want.
+The files are not scrambled on purpose: you can read, edit, or delete them
+directly. Delete a folder to delete an entry. Nothing is hidden from you.
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## FOR GROWN-UPS
 
-| Key | Action |
-|-----|--------|
-| `/` | Focus search |
-| `?` | Show keyboard shortcuts help |
-| `1` | Switch to Secrets tab |
-| `2` | Switch to Env Vars tab |
-| `N` | New secret (in Secrets tab) |
-| `E` | New env var (in Env Vars tab) |
-| `R` | Manual refresh |
-| `Ctrl+K` / `Cmd+K` | Open command palette |
-| `Ctrl+Enter` | Save current editor |
-| `Esc` | Close editor / modal / palette |
+### Starting from the terminal
 
----
+```bash
+vault.exe                    # Windows
+./vault                      # Linux / Mac
 
-## 🔌 API Reference
+vault.exe -port 8080         # use a different port
+vault.exe -no-browser        # do not open the browser
+vault.exe -version           # print the version and exit
+vault.exe --lan              # also listen on your local network (phones, Termux)
+VAULT_ALLOW_HOSTS=my-tunnel.trycloudflare.com vault.exe --lan   # allow a tunnel hostname
+```
 
-All endpoints are JSON over HTTP, listening on `127.0.0.1:7575`.
+Other details:
 
-### Secrets
+- Port **7575** is the default. If something else uses it, vault finds that
+  process, stops it, and takes the port.
+- LAN mode (`--lan` / `--host 0.0.0.0`) prints all your network addresses in
+  the terminal banner and re-scans every 30 seconds.
+- The app auto-migrates old flat-file vaults to the folder layout on first run.
+
+### API reference
+
+All endpoints speak JSON over HTTP on `127.0.0.1:7575`.
+
+Secrets:
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/api/list` | List all secrets |
-| `GET`  | `/api/get?name=X` | Get one secret's value + details |
+| `GET`  | `/api/get?name=X` | Get one secret (value + details) |
 | `POST` | `/api/save` | Save a secret `{name, value, details}` |
 | `POST` | `/api/delete?name=X` | Delete a secret |
 
-### Env Vars
+Env vars:
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/api/env/list` | List all env vars |
-| `GET`  | `/api/env/get?key=X` | Get one env var's value + secret flag |
+| `GET`  | `/api/env/get?key=X` | Get one env var (value + secret flag) |
 | `POST` | `/api/env/save` | Save an env var `{key, value, secret}` |
 | `POST` | `/api/env/delete?key=X` | Delete an env var |
-| `GET`  | `/api/env/export` | Download all env vars as `.env` file |
-| `POST` | `/api/env/import` | Import env vars from `.env` text body |
+| `GET`  | `/api/env/export` | Download all env vars as `.env` |
+| `POST` | `/api/env/import` | Import env vars from `.env` text |
 
-### System
+Gateways:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET`  | `/api/gateway/list` | List all gateways |
+| `GET`  | `/api/gateway/get?name=X` | Get one gateway |
+| `POST` | `/api/gateway/save` | Save a gateway `{name, type, description, vars}` |
+| `POST` | `/api/gateway/delete?name=X` | Delete a gateway |
+
+System:
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/api/health` | Health check (uptime, version) |
-| `GET`  | `/api/stats` | Stats (counts, total size, uptime, AI status, LAN status) |
-| `GET`  | `/api/version` | Version (go version, platform, port, LAN mode) |
+| `GET`  | `/api/stats` | Stats (counts, size, uptime, AI + LAN status) |
+| `GET`  | `/api/version` | Version (go, platform, port, LAN mode) |
 | `GET`  | `/api/audit` | Last 100 audit log entries |
-| `GET`  | `/api/backup` | One-click JSON backup of all secrets + env vars |
+| `GET`  | `/api/backup` | One-click JSON backup of everything |
 
-### AI Access (token-protected, no Origin check - works from curl / AI tools)
+AI Access (token-protected, no Origin check - works from curl / AI tools):
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET`  | `/api/ai/status` | List all tokens with created / expiry / revoked state |
-| `POST` | `/api/ai/token` | Generate a token, `{"days": 1, 7, 30, or 0 = never}` (default 7) |
-| `DELETE` | `/api/ai/token?id=X` | Revoke a specific token |
-| `GET`  | `/api/ai/list` | List all entry names (bearer token required, rate-limited) |
-| `GET`  | `/api/ai/read?name=X` | Read a secret or env var value (bearer token required, rate-limited) |
+| `GET`    | `/api/ai/status` | List tokens (created / expiry / revoked) |
+| `POST`   | `/api/ai/token` | Generate a token `{"days": 1, 7, 30, or 0 = never}` (default 7) |
+| `DELETE` | `/api/ai/token?id=X` | Delete a token for good |
+| `GET`    | `/api/ai/list` | List all entry names (bearer token, rate-limited) |
+| `GET`    | `/api/ai/read?name=X` | Read a value (bearer token, rate-limited) |
 
-### Examples
+Tunnel:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET`  | `/api/tunnel` | Tunnel status (running / URL) |
+| `POST` | `/api/tunnel/start` | Start the built-in HTTPS tunnel |
+| `POST` | `/api/tunnel/stop` | Stop the tunnel |
+
+Useful examples:
 
 ```bash
 # list env vars
@@ -201,167 +304,86 @@ curl -X POST http://127.0.0.1:7575/api/env/save \
   -H "Content-Type: application/json" \
   -d '{"key":"DATABASE_URL","value":"postgres://user:pass@host/db","secret":true}'
 
-# export as .env
+# export / import .env
 curl -OJ http://127.0.0.1:7575/api/env/export
+curl -X POST http://127.0.0.1:7575/api/env/import --data-binary @.env
 
-# import from .env file
-curl -X POST http://127.0.0.1:7575/api/env/import \
-  --data-binary @.env
-
-# one-click backup (all secrets + env vars as JSON)
+# one-click backup (everything as JSON)
 curl -OJ http://127.0.0.1:7575/api/backup
 
-# view access history (last 100 events)
-curl http://127.0.0.1:7575/api/audit
+# AI access
+curl -H "Authorization: Bearer TOKEN" http://127.0.0.1:7575/api/ai/list
+curl -H "Authorization: Bearer TOKEN" "http://127.0.0.1:7575/api/ai/read?name=roblox"
 ```
 
-### AI access from terminal
+### Security model
 
-```bash
-# 1. generate a token (in the vault UI, click the AI button → Generate token)
+- **Origin/Host check (CSRF protection).** Browsers that send an `Origin`
+  header must come from `127.0.0.1`, `localhost`, or `::1` - anything else
+  gets `403 Forbidden`. Requests without an Origin (curl, scripts, terminal
+  AIs) are allowed, which keeps automation working. `Referer` is checked as a
+  fallback.
+- **DNS-rebinding defense.** A Host allowlist: loopback plus your LAN IPs
+  (`--lan` mode), plus anything in `VAULT_ALLOW_HOSTS`.
+- **Security headers.** CSP, `nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: no-referrer`, `X-XSS-Protection`.
+- **Server hardening.** Read/Write 30s, Idle 120s, 1MB max headers.
+- **AI tokens.** 32-byte hex tokens, constant-time compare, rate-limited to
+  60 requests/min per IP, per-token permanent delete, expiry enforced on
+  every read.
+- **Audit log.** Every save/delete and every AI read lands in `audit.log`
+  with a timestamp and source IP.
+- **Atomic writes.** Files are written to a temp file then renamed, so a
+  crash cannot corrupt your vault.
 
-# 2. list all entries
-curl -H "Authorization: Bearer YOUR_TOKEN" http://127.0.0.1:7575/api/ai/list
+Why no login or encryption? The vault is localhost-first and single-user.
+Browser attacks are stopped by the Origin/Host checks, and AI/script reads by
+bearer tokens. For remote or multi-user use, put TLS in front and gate the
+whole API with a token. For encryption at rest, layer `gocryptfs` or
+`VeraCrypt` over `~/Vault`.
 
-# 3. read a specific secret
-curl -H "Authorization: Bearer YOUR_TOKEN" \
-  "http://127.0.0.1:7575/api/ai/read?name=roblox"
-```
+**Backup hygiene:** do not sync `~/Vault/` to cloud storage in plaintext.
+Encrypt backups first:
 
-### LAN mode (phone access)
-
-```bash
-# expose on your local network
-vault.exe --lan
-# or: vault.exe --host 0.0.0.0
-
-# the terminal banner prints all LAN URLs:
-#   lan    http://192.168.1.50:7575
-#   lan    http://192.168.1.51:7575
-# open one on your phone - the vault auto-allows your NIC IPs
-```
-
-### Exposing to a cloud AI (tunnel)
-
-The vault has a one-click HTTPS tunnel built in. In the AI Access panel, hit **Start tunnel**, copy the URL, and give it to your AI together with a generated token. The tunnel's hostname is allowed automatically - no restart needed:
-
-```bash
-# manual alternative, if you want to run cloudflared yourself
-cloudflared tunnel --url http://localhost:7575
-#    -> https://random-name.trycloudflare.com
-#    then restart the vault, allowing that hostname (comma-separated for several)
-set VAULT_ALLOW_HOSTS=random-name.trycloudflare.com
-vault.exe --lan
-```
-
-Example calls from the AI side (AI Access -> Generate for a token):
-
-```bash
-curl -H "Authorization: Bearer TOKEN" https://random-name.trycloudflare.com/api/ai/list
-curl -H "Authorization: Bearer TOKEN" "https://random-name.trycloudflare.com/api/ai/read?name=Github"
-```
-
-The token still gates every read (expiry + rate limit + per-token revoke). The tunnel provides TLS, so the token is encrypted in transit. Delete the token in the UI when done.
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────┐
-│           vault.exe (Go binary)         │
-│  ┌───────────────────────────────────┐  │
-│  │   vault.html (embedded via        │  │
-│  │   //go:embed directive)          │  │
-│  │   - single-file HTML/CSS/JS      │  │
-│  │   - glass morphism + matrix rain │  │
-│  │   - vanilla JS, no build step    │  │
-│  └───────────────────────────────────┘  │
-│  ┌───────────────────────────────────┐  │
-│  │   HTTP server (net/http)         │  │
-│  │   - port takeover on bind fail   │  │
-│  │   - graceful shutdown (SIGINT)   │  │
-│  │   - atomic file writes + mutex   │  │
-│  │   - timeouts on read/write/idle  │  │
-│  └───────────────────────────────────┘  │
-│  ┌───────────────────────────────────┐  │
-│  │   Filesystem storage             │  │
-│  │   - ~/Vault/Secrets/{name}/...   │  │
-│  │   - ~/Vault/EnvVars/{key}/...    │  │
-│  │   - plaintext by design          │  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
-```
-
-### Tech Stack
-
-- **Backend**: [Go 1.21+](https://go.dev) - stdlib `net/http`, `embed`, `os`, `os/exec`
-- **Frontend**: vanilla HTML/CSS/JS - no framework, no build step
-- **Fonts**: Space Grotesk (display), JetBrains Mono (body), Share Tech Mono (terminal labels)
-- **Storage**: filesystem, one folder per entry, plaintext files
-
----
-
-## 🛡️ Security
-
-### Origin/Host check (CSRF protection)
-The server runs a security middleware that blocks **any cross-origin request** coming from a browser. This is the single real attack surface for a localhost app: a malicious webpage making `fetch("http://127.0.0.1:7575/api/delete?name=...")` to delete your vault.
-
-- If the `Origin` header is present, it must be `127.0.0.1`, `localhost`, or `::1` - anything else gets `403 Forbidden`
-- If `Origin` is absent (terminal AIs, curl, scripts), the request is allowed - terminal workflows keep working
-- `Referer` is also checked as a fallback for browsers that omit `Origin`
-
-```bash
-# terminal (no Origin header) - works
-curl http://127.0.0.1:7575/api/health
-
-# same-origin from the vault UI - works
-curl -H "Origin: http://127.0.0.1:7575" http://127.0.0.1:7575/api/health
-
-# cross-origin from a malicious page - BLOCKED
-curl -H "Origin: https://evil.com" http://127.0.0.1:7575/api/health
-# => 403 Forbidden
-```
-
-### Security headers
-Every response includes:
-- `Content-Security-Policy` - strict allowlist (`'self'`, Google Fonts, `data:` URIs)
-- `X-Content-Type-Options: nosniff` - no MIME sniffing
-- `X-Frame-Options: DENY` - no clickjacking
-- `Referrer-Policy: no-referrer` - no referrer leakage
-- `X-XSS-Protection: 1; mode=block` - legacy XSS filter
-
-### HTTP server timeouts
-Read/Write 30s, Idle 120s, ReadHeader 10s, MaxHeaderBytes 1MB - prevents slowloris-style resource exhaustion.
-
-### Why no login / encryption?
-
-The vault is a localhost-first, single-user app: the UI endpoints are protected from malicious webpages by the Origin/Host checks above. AI and script reads are protected by the optional bearer token (see AI Access). If you need more:
-- **For multi-user / remote access**: add TLS and put the whole API behind the token
-- **For real encryption at rest**: layer `gocryptfs` or `VeraCrypt` on top of `~/Vault/`
-
-### Backup hygiene
-**Do not sync `~/Vault/` to cloud storage in plaintext.** If you back it up, encrypt the backup first:
 ```bash
 tar czf - ~/Vault | gpg --symmetric --cipher-algo AES256 -o vault-backup.tar.gz.gpg
 ```
 
-### Plaintext by design
-Stored values are plaintext on disk. The server binds to `127.0.0.1` only (no remote access). No authentication, no TLS.
+### Architecture
+
+A single Go binary with the UI embedded inside it (`//go:embed vault.html`).
+
+```
+vault.exe (Go binary)
+  -> vault.html embedded (one file: HTML + CSS + JS, no build step)
+  -> HTTP server (net/http, port takeover, graceful shutdown, atomic writes)
+  -> Filesystem storage (~/Vault/{Secrets,EnvVars,Gateways}, plaintext by design)
+```
+
+- Backend: Go 1.21+, standard library only
+- Frontend: vanilla HTML/CSS/JS, no framework
+- Fonts: Space Grotesk, JetBrains Mono, Share Tech Mono
+- Storage: one folder per entry, plaintext files
+
+### Building from source
+
+```bash
+git clone https://github.com/AshesOfTheUndead/Vault.git
+cd Vault
+go build -o vault .
+
+# or use the scripts
+./build.sh        # linux/mac
+build.bat         # windows
+```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-PRs welcome. Keep it small and focused.
+PRs welcome. Keep them small and focused. Before submitting:
 
 ```bash
-# setup
-git clone https://github.com/AshesOfTheUndead/Vault.git
-cd vault
-go build -o vault .
-
-# before submitting, make sure these pass:
 gofmt -w main.go
 go vet ./...
 go build -o vault .
@@ -369,15 +391,12 @@ go build -o vault .
 
 ---
 
-## 📜 License
+## License
 
 MIT - see [LICENSE](LICENSE).
 
----
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) by Florian Karsten
 - [JetBrains Mono](https://www.jetbrains.com/lp/mono/) by JetBrains
 - [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) by Carrois Apostille
-
