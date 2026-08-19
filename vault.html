@@ -657,6 +657,7 @@
   }
   .icon-btn:hover { color: var(--accent); background: rgba(52, 211, 153, 0.1); box-shadow: 0 0 16px rgba(52, 211, 153, 0.18); transform: scale(1.1); }
   .icon-btn.danger:hover { color: var(--danger); background: rgba(251, 113, 133, 0.12); box-shadow: 0 0 16px rgba(251, 113, 133, 0.24); }
+  .icon-btn.shown { color: var(--accent); }
   .icon-btn svg { width: 14px; height: 14px; }
 
   .empty {
@@ -1115,32 +1116,101 @@
     body::before { display: none; }
   }
 
-  .ai-modal { width: min(560px, calc(100vw - 32px)); }
-  .ai-status { display: flex; justify-content: center; margin: 18px 0 14px; }
+  .ai-modal { width: min(600px, calc(100vw - 32px)); }
+  .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
   .ai-pill {
     display: inline-flex; align-items: center; gap: 9px;
     font-family: var(--mono); font-size: 11px; font-weight: 600;
     letter-spacing: 0.12em; text-transform: uppercase;
-    padding: 7px 16px; border-radius: 999px;
+    padding: 6px 14px; border-radius: 999px;
     border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2);
+    flex: none;
   }
   .ai-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-mute); }
   .ai-pill.ai-on { color: var(--accent-hi); border-color: rgba(52, 211, 153, 0.4); box-shadow: 0 0 16px rgba(52, 211, 153, 0.15); }
   .ai-pill.ai-on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: ledPing 2s var(--ease-out) infinite; }
-  .ai-token-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 4px; }
-  .ai-token {
-    font-family: var(--mono); font-size: 11px; color: var(--accent-hi);
-    background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25);
-    padding: 7px 12px; border-radius: var(--r);
-    word-break: break-all; max-width: 340px; line-height: 1.5;
+  .ai-desc { margin: 12px 0 18px; color: var(--ink-2); font-size: 13px; line-height: 1.6; }
+
+  .ai-fresh {
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    background: rgba(52, 211, 153, 0.06);
+    border-radius: var(--r);
+    padding: 12px 14px; margin-bottom: 14px;
   }
+  .ai-fresh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .ai-fresh-title { font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-hi); }
+  .ai-fresh-note { font-size: 11px; color: var(--ink-mute); }
+  .ai-fresh-body { display: flex; gap: 10px; align-items: stretch; }
+  .ai-token {
+    flex: 1; min-width: 0;
+    font-family: var(--mono); font-size: 11px; color: var(--accent-hi);
+    background: rgba(2, 6, 8, 0.5); border: 1px solid rgba(52, 211, 153, 0.2);
+    padding: 9px 12px; border-radius: var(--r);
+    word-break: break-all; line-height: 1.5;
+  }
+  .ai-fresh-exp { font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); margin-top: 9px; display: flex; align-items: center; gap: 6px; }
+  .ai-fresh-exp::before { content: '◷'; color: var(--accent); font-size: 11px; }
+
+  .ai-gen-row { display: flex; gap: 12px; align-items: stretch; margin-bottom: 16px; }
+  .ai-ttl {
+    display: flex; flex-direction: column; gap: 5px; flex: none;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute);
+  }
+  .ai-ttl select {
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 8px 10px; cursor: pointer;
+  }
+  .ai-ttl select:hover, .ai-ttl select:focus-visible { border-color: var(--accent); outline: none; }
+
+  .ai-section { margin-bottom: 16px; }
+  .ai-section-title {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .ai-count { color: var(--ink-mute); font-weight: 400; letter-spacing: 0; }
+  .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ai-token-item {
+    display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface-2);
+    transition: border-color 0.2s var(--ease);
+  }
+  .ai-token-item:hover { border-color: var(--line-bright); }
+  .ai-token-item.ai-item-revoked { opacity: 0.55; }
+  .ai-token-id { font-family: var(--mono); font-size: 12px; color: var(--ink); letter-spacing: 0.06em; }
+  .ai-token-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ai-token-created { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); }
+  .ai-token-exp { font-family: var(--mono); font-size: 10px; color: var(--ink-2); }
+  .ai-token-exp.ai-exp-late { color: var(--danger); }
+  .ai-badge {
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line);
+    color: var(--ink-mute);
+  }
+  .ai-badge-active { color: var(--accent-hi); border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.08); }
+  .ai-badge-expired { color: var(--danger); border-color: rgba(251, 113, 133, 0.4); background: rgba(251, 113, 133, 0.08); }
+  .ai-badge-revoked { color: var(--ink-mute); }
+  .ai-revoke { white-space: nowrap; }
+
   .ai-example {
-    margin: 14px 0 0; text-align: left; justify-content: flex-start;
+    margin: 0; text-align: left; justify-content: flex-start;
     font-family: var(--mono); font-size: 10.5px; line-height: 1.8;
   }
   .ai-example code {
     color: var(--accent-hi); background: rgba(52, 211, 153, 0.06);
     padding: 1px 5px; border-radius: 4px; word-break: break-all;
+  }
+  .ai-examples { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+  .ai-example-title {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 6px;
   }
 </style>
 </head>
@@ -1160,7 +1230,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v3.0</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v3.1</span>
         </h1>
       </div>
       <p class="tag">
@@ -1430,19 +1500,43 @@
 
 <div class="modal-backdrop" id="aiModal" role="dialog" aria-modal="true" aria-labelledby="aiTitle">
   <div class="modal ai-modal">
-    <h2 id="aiTitle">AI Access</h2>
-    <p>Let AI tools and scripts read your secrets through a token-protected API. The token is a master key: anyone holding it can read every value.</p>
-    <div class="ai-status" id="aiStatus"></div>
-    <div class="ai-token-row" id="aiTokenRow" hidden>
-      <code class="ai-token" id="aiTokenValue"></code>
-      <button class="btn btn-ghost btn-sm" id="aiCopyToken">Copy</button>
+    <div class="ai-head">
+      <h2 id="aiTitle">AI Access</h2>
+      <span class="ai-pill ai-off" id="aiPill"><i></i><span id="aiPillText">Disabled</span></span>
     </div>
-    <div class="modal-actions" style="margin-top: 20px;">
-      <button class="btn btn-ghost" id="aiRevoke" hidden>Revoke</button>
-      <button class="btn btn-primary" id="aiGenerate" style="flex: 1;">Generate token</button>
+    <p class="ai-desc">Token-protected API for AI tools and scripts. Anyone holding a token can read every value. Revoke a token to cut off access immediately.</p>
+    <div class="ai-fresh" id="aiFresh" hidden>
+      <div class="ai-fresh-top">
+        <span class="ai-fresh-title">Token generated</span>
+        <span class="ai-fresh-note">shown once - copy it now</span>
+      </div>
+      <div class="ai-fresh-body">
+        <code class="ai-token" id="aiTokenValue"></code>
+        <button class="btn btn-primary btn-sm" id="aiCopyToken">Copy</button>
+      </div>
+      <div class="ai-fresh-exp" id="aiFreshExp"></div>
     </div>
-    <p class="ai-example">List: <code>curl -H "Authorization: Bearer TOKEN" http://localhost:7575/api/ai/list</code></p>
-    <p class="ai-example">Read: <code>curl -H "Authorization: Bearer TOKEN" "http://localhost:7575/api/ai/read?name=MySecret"</code></p>
+    <div class="ai-gen-row">
+      <label class="ai-ttl">
+        <span>Valid for</span>
+        <select id="aiTtl">
+          <option value="1">1 day</option>
+          <option value="7" selected>7 days</option>
+          <option value="30">30 days</option>
+          <option value="0">Never</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" id="aiGenerate" style="flex:1; align-self:flex-end;">Generate token</button>
+    </div>
+    <div class="ai-section" id="aiTokenListWrap" hidden>
+      <div class="ai-section-title">Tokens <span class="ai-count" id="aiTokenCount"></span></div>
+      <ul class="ai-token-list" id="aiTokenList"></ul>
+    </div>
+    <div class="ai-examples">
+      <div class="ai-example-title">curl usage</div>
+      <p class="ai-example"><code>curl -H "Authorization: Bearer TOKEN" http://localhost:7575/api/ai/list</code></p>
+      <p class="ai-example"><code>curl -H "Authorization: Bearer TOKEN" "http://localhost:7575/api/ai/read?name=MySecret"</code></p>
+    </div>
   </div>
 </div>
 
@@ -1515,6 +1609,8 @@
     if (!v) return '';
     return '•'.repeat(Math.min(12, Math.max(8, v.length)));
   }
+  const ICON_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const ICON_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
 
   /* password strength estimator (0=very weak → 4=strong) */
   function strengthLevel(v) {
@@ -1852,13 +1948,18 @@
             <span class="idx">${String(i + 1).padStart(2, '0')}</span>
             <span class="meta">
               <span class="name">${esc(d.name)}</span>
-              <span class="sub">${esc(String(d.value || '')).slice(0, 56)}${String(d.value || '').length > 56 ? '…' : ''}</span>
+              <span class="sub">${secretShown.has(d.name)
+                ? esc(String(d.value || '')).slice(0, 56) + (String(d.value || '').length > 56 ? '…' : '')
+                : esc(maskValue(d.value))}</span>
               ${d.details ? `<span class="det">${esc(String(d.details)).replace(/\n/g, ' ').slice(0, 80)}${String(d.details).length > 80 ? '…' : ''}</span>` : ''}
             </span>
             <span class="badge">secret</span>
             <span class="icons">
               <button class="icon-btn" data-act="copy" title="Copy value" aria-label="Copy value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              </button>
+              <button class="icon-btn${secretShown.has(d.name) ? ' shown' : ''}" data-act="reveal" title="Show / hide value" aria-label="Show or hide value">
+                ${secretShown.has(d.name) ? ICON_EYE : ICON_EYE_OFF}
               </button>
               <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -1900,8 +2001,8 @@
               <button class="icon-btn" data-act="copy" title="Copy value" aria-label="Copy value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
               </button>
-              <button class="icon-btn" data-act="reveal" title="Reveal value" aria-label="Reveal value">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <button class="icon-btn" data-act="reveal" title="Show / hide value" aria-label="Show or hide value">
+                ${d.secret ? ICON_EYE_OFF : ICON_EYE}
               </button>
               <button class="icon-btn" data-act="edit" title="Edit" aria-label="Edit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -1972,6 +2073,26 @@
   }
 
   let envRevealTimers = new Map();
+  // secretShown tracks which secret rows the user has revealed; everything
+  // starts hidden by default and stays hidden across the 4s poll re-renders
+  let secretShown = new Set();
+  function toggleSecretReveal(name, btn) {
+    const li = btn.closest('li[data-name]');
+    if (!li) return;
+    const sub = li.querySelector('.sub');
+    const d = data.find(x => x.name === name);
+    if (!d || !sub) return;
+    const show = !secretShown.has(name);
+    if (show) {
+      secretShown.add(name);
+      sub.textContent = String(d.value || '').slice(0, 56) + (d.value && d.value.length > 56 ? '…' : '');
+    } else {
+      secretShown.delete(name);
+      sub.textContent = maskValue(d.value);
+    }
+    btn.innerHTML = show ? ICON_EYE : ICON_EYE_OFF;
+    btn.classList.toggle('shown', show);
+  }
   function toggleEnvReveal(key, btn) {
     const li = btn.closest('li[data-key]');
     if (!li) return;
@@ -1982,19 +2103,22 @@
     if (valEl.classList.contains('masked')) {
       valEl.classList.remove('masked');
       valEl.textContent = d.value || '(empty)';
-      btn.style.color = 'var(--accent)';
+      btn.classList.add('shown');
+      btn.innerHTML = ICON_EYE;
       if (envRevealTimers.has(key)) clearTimeout(envRevealTimers.get(key));
       const t = setTimeout(() => {
         valEl.classList.add('masked');
         valEl.textContent = maskValue(d.value);
-        btn.style.color = '';
+        btn.classList.remove('shown');
+        btn.innerHTML = ICON_EYE_OFF;
         envRevealTimers.delete(key);
       }, 4000);
       envRevealTimers.set(key, t);
     } else {
       valEl.classList.add('masked');
       valEl.textContent = maskValue(d.value);
-      btn.style.color = '';
+      btn.classList.remove('shown');
+      btn.innerHTML = ICON_EYE_OFF;
       if (envRevealTimers.has(key)) { clearTimeout(envRevealTimers.get(key)); envRevealTimers.delete(key); }
     }
   }
@@ -2007,6 +2131,7 @@
     const name = li.dataset.name, act = btn.dataset.act;
     if (act === 'edit') { openEditor(name); return; }
     if (act === 'copy') { copyVal(name, false, btn); return; }
+    if (act === 'reveal') { toggleSecretReveal(name, btn); return; }
     if (act === 'del') { showConfirm(name, 'secret'); return; }
   });
   envList.addEventListener('click', (ev) => {
@@ -2112,18 +2237,46 @@
   });
 
   // AI access panel
-  const aiModal = $('#aiModal'), aiStatus = $('#aiStatus'), aiTokenRow = $('#aiTokenRow');
-  const aiTokenValue = $('#aiTokenValue'), aiCopyToken = $('#aiCopyToken');
-  const aiGenerate = $('#aiGenerate'), aiRevoke = $('#aiRevoke');
+  const aiModal = $('#aiModal'), aiPill = $('#aiPill'), aiPillText = $('#aiPillText');
+  const aiFresh = $('#aiFresh'), aiTokenValue = $('#aiTokenValue'), aiCopyToken = $('#aiCopyToken'), aiFreshExp = $('#aiFreshExp');
+  const aiTtl = $('#aiTtl'), aiGenerate = $('#aiGenerate');
+  const aiTokenListWrap = $('#aiTokenListWrap'), aiTokenList = $('#aiTokenList'), aiTokenCount = $('#aiTokenCount');
   let aiTokenCache = '';
+  function fmtAIDate(iso) {
+    if (!iso) return 'never';
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
   function renderAiStatus(s) {
-    const pill = document.createElement('span');
-    pill.className = 'ai-pill ' + (s.enabled ? 'ai-on' : 'ai-off');
-    pill.innerHTML = '<i></i>' + (s.enabled ? 'Enabled' : 'Disabled');
-    aiStatus.replaceChildren(pill);
-    aiTokenRow.hidden = !s.enabled;
-    aiRevoke.hidden = !s.enabled;
-    aiGenerate.textContent = s.enabled ? 'Rotate token' : 'Generate token';
+    const on = !!s.enabled;
+    aiPill.className = 'ai-pill ' + (on ? 'ai-on' : 'ai-off');
+    aiPillText.textContent = on ? 'Enabled' : 'Disabled';
+    const tokens = s.tokens || [];
+    aiTokenListWrap.hidden = !tokens.length;
+    aiTokenCount.textContent = tokens.length ? '(' + tokens.length + ')' : '';
+    if (tokens.length) {
+      const now = Date.now();
+      aiTokenList.innerHTML = tokens.map(t => {
+        const exp = t.expires ? new Date(t.expires) : null;
+        const expired = !!exp && exp.getTime() < now;
+        const st = t.revoked ? ['revoked', 'Revoked']
+          : expired ? ['expired', 'Expired']
+          : ['active', 'Active'];
+        const expLabel = t.expires
+          ? (expired ? 'expired ' + fmtAIDate(t.expires) : 'expires ' + fmtAIDate(t.expires))
+          : 'never expires';
+        return `
+        <li class="ai-token-item${t.revoked ? ' ai-item-revoked' : ''}">
+          <code class="ai-token-id">${esc(t.id)}&#8226;&#8226;&#8226;&#8226;</code>
+          <span class="ai-token-meta">
+            <span class="ai-token-created">created ${fmtAIDate(t.created)}</span>
+            <span class="ai-token-exp${expired && !t.revoked ? ' ai-exp-late' : ''}">${esc(expLabel)}</span>
+          </span>
+          <span class="ai-badge ai-badge-${st[0]}">${st[1]}</span>
+          ${(!t.revoked && !expired) ? `<button class="btn btn-ghost btn-sm ai-revoke" data-id="${esc(t.id)}">Revoke</button>` : ''}
+        </li>`;
+      }).join('');
+    }
   }
   aiBtn.addEventListener('click', async () => {
     aiModal.classList.add('open');
@@ -2139,13 +2292,20 @@
   aiGenerate.addEventListener('click', async () => {
     aiGenerate.classList.add('btn-busy');
     try {
-      const j = await api('/api/ai/token', { method: 'POST' });
+      const days = parseInt(aiTtl.value, 10);
+      const j = await api('/api/ai/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ days })
+      });
       aiTokenCache = j.token;
       aiTokenValue.textContent = j.token;
-      aiTokenRow.hidden = false;
-      aiRevoke.hidden = false;
-      aiGenerate.textContent = 'Rotate token';
+      aiFreshExp.textContent = j.expires
+        ? 'expires ' + fmtAIDate(j.expires)
+        : 'never expires';
+      aiFresh.hidden = false;
       notify('Token generated - copy it now, it is shown only once');
+      renderAiStatus(await api('/api/ai/status'));
     } catch (e) {
       notify('Generate failed: ' + esc(e.message), 'err');
     } finally {
@@ -2163,14 +2323,17 @@
       notify('Copy failed: ' + esc(e.message), 'err');
     }
   });
-  aiRevoke.addEventListener('click', async () => {
+  aiTokenList.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('.ai-revoke');
+    if (!btn) return;
+    btn.classList.add('btn-busy');
     try {
-      await api('/api/ai/token', { method: 'DELETE' });
-      aiTokenCache = '';
-      renderAiStatus({ enabled: false });
-      notify('Token revoked - AI access is now disabled');
+      await api('/api/ai/token?id=' + encodeURIComponent(btn.dataset.id), { method: 'DELETE' });
+      notify('Token revoked - access cut off immediately');
+      renderAiStatus(await api('/api/ai/status'));
     } catch (e) {
       notify('Revoke failed: ' + esc(e.message), 'err');
+      btn.classList.remove('btn-busy');
     }
   });
 

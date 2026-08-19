@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-22d3ee)](#)
 [![Port](https://img.shields.io/badge/Port-7575-fbbf24)](#)
-[![Version](https://img.shields.io/badge/version-3.0.0-34d399)](#)
+[![Version](https://img.shields.io/badge/version-3.1.0-34d399)](#)
 
 ---
 
@@ -18,7 +18,7 @@
 - **DNS-rebinding defense** - Host header allowlist (only loopback + LAN IPs in `--lan` mode)
 - **Strict security headers** - CSP, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-XSS-Protection`
 - **HTTP server timeouts** - Read/Write 30s, Idle 120s, MaxHeaderBytes 1MB (slowloris-resistant)
-- **AI access tokens** - generate a 32-byte hex token (constant-time compare, rate-limited 60 req/min per IP) so AI tools/scripts can read secrets via `Authorization: Bearer <token>`
+- **AI access tokens** - generate 32-byte hex tokens that expire after 1, 7 or 30 days (or never), each shown with its exact expiry timestamp in the UI; constant-time compare, rate-limited 60 req/min per IP, per-token revoke
 - **Audit log** - every secret/env save/delete and every AI read is logged to `~/Vault/audit.log` with timestamp + source IP; viewable in the Access History modal
 - **LAN mode** (`--lan` or `--host 0.0.0.0`) - exposes vault on your local network so phones/Termux can reach it; auto-scans NIC IPs every 30s for DHCP/reconnect resilience
 - **Port takeover** - if port 7575 is in use, vault finds the process, kills it, and takes over
@@ -183,9 +183,9 @@ All endpoints are JSON over HTTP, listening on `127.0.0.1:7575`.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET`  | `/api/ai/status` | Check if AI token is enabled |
-| `POST` | `/api/ai/token` | Generate / rotate AI token |
-| `DELETE` | `/api/ai/token` | Revoke AI token |
+| `GET`  | `/api/ai/status` | List all tokens with created / expiry / revoked state |
+| `POST` | `/api/ai/token` | Generate a token, `{"days": 1, 7, 30, or 0 = never}` (default 7) |
+| `DELETE` | `/api/ai/token?id=X` | Revoke a specific token |
 | `GET`  | `/api/ai/list` | List all entry names (bearer token required, rate-limited) |
 | `GET`  | `/api/ai/read?name=X` | Read a secret or env var value (bearer token required, rate-limited) |
 

@@ -33,7 +33,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "3.0.0"
+	version     = "3.1.0"
 )
 
 var (
@@ -236,20 +236,79 @@ func deleteValue(name string) error {
 
 /* ---------- AI access API (token-protected read for AI tools / scripts) ---------- */
 
+// AIToken is one entry in the token store. The full token value lives only
+// on disk (ai.tokens.json); API responses omit it via publicAITokens.
+type AIToken struct {
+	ID       string `json:"id"`
+	Token    string `json:"token,omitempty"`
+	Created  string `json:"created"`
+	Expires  string `json:"expires"`
+	Revoked  bool   `json:"revoked"`
+	LastUsed string `json:"lastUsed"`
+}
+
+// aiTokenFile is the legacy single-token path (migrated to the store below).
 func aiTokenFile() string {
 	return filepath.Join(vaultDir, "ai.token")
 }
 
-func loadAIToken() (string, bool) {
+func aiTokensFile() string {
+	return filepath.Join(vaultDir, "ai.tokens.json")
+}
+
+var tokensMu sync.Mutex
+
+func loadAITokens() []AIToken {
+	b, err := os.ReadFile(aiTokensFile())
+	if err != nil {
+		return nil
+	}
+	var store struct {
+		Tokens []AIToken `json:"tokens"`
+	}
+	if json.Unmarshal(b, &store) != nil {
+		return nil
+	}
+	return store.Tokens
+}
+
+func saveAITokens(tokens []AIToken) error {
+	store := struct {
+		Tokens []AIToken `json:"tokens"`
+	}{Tokens: tokens}
+	b, err := json.MarshalIndent(store, "", "  ")
+	if err != nil {
+		return err
+	}
+	return atomicWriteFile(aiTokensFile(), b)
+}
+
+// migrateLegacyAIToken imports the old single ai.token file into the store
+// so existing setups keep working after the upgrade. The legacy token has
+// no expiry (never expires) and keeps its original ID prefix.
+func migrateLegacyAIToken() {
+	if _, err := os.Stat(aiTokensFile()); err == nil {
+		return
+	}
 	b, err := os.ReadFile(aiTokenFile())
 	if err != nil {
-		return "", false
+		return
 	}
 	tok := strings.TrimSpace(string(b))
 	if len(tok) < 16 {
-		return "", false
+		os.Remove(aiTokenFile())
+		return
 	}
-	return tok, true
+	tokens := loadAITokens()
+	tokens = append(tokens, AIToken{
+		ID:      tok[:8],
+		Token:   tok,
+		Created: time.Now().Format(time.RFC3339),
+	})
+	if saveAITokens(tokens) == nil {
+		os.Remove(aiTokenFile())
+		log.Printf("ai-access: migrated legacy token %s", tok[:8])
+	}
 }
 
 func generateAIToken() (string, error) {
@@ -260,21 +319,68 @@ func generateAIToken() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func revokeAIToken() {
-	os.Remove(aiTokenFile())
+// validAIToken matches the bearer token against the store, skipping revoked
+// and expired entries, and stamps LastUsed on a hit.
+func validAIToken(r *http.Request) (*AIToken, bool) {
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return nil, false
+	}
+	got := strings.TrimPrefix(auth, "Bearer ")
+	tokensMu.Lock()
+	defer tokensMu.Unlock()
+	tokens := loadAITokens()
+	now := time.Now()
+	for i := range tokens {
+		t := &tokens[i]
+		if t.Revoked || t.Token == "" {
+			continue
+		}
+		if t.Expires != "" {
+			if exp, err := time.Parse(time.RFC3339, t.Expires); err == nil && now.After(exp) {
+				continue
+			}
+		}
+		if subtle.ConstantTimeCompare([]byte(got), []byte(t.Token)) == 1 {
+			t.LastUsed = now.Format(time.RFC3339)
+			saveAITokens(tokens)
+			return t, true
+		}
+	}
+	return nil, false
 }
 
 func aiBearerOK(r *http.Request) bool {
-	tok, ok := loadAIToken()
-	if !ok {
-		return false
+	_, ok := validAIToken(r)
+	return ok
+}
+
+// publicAITokens strips the secret token value before serialization.
+func publicAITokens(tokens []AIToken) []AIToken {
+	out := make([]AIToken, 0, len(tokens))
+	for _, t := range tokens {
+		t.Token = ""
+		out = append(out, t)
 	}
-	auth := r.Header.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
-		return false
+	return out
+}
+
+// aiActiveCount counts non-revoked, non-expired tokens.
+func aiActiveCount(tokens []AIToken) int {
+	now := time.Now()
+	n := 0
+	for _, t := range tokens {
+		if t.Revoked {
+			continue
+		}
+		if t.Expires != "" {
+			if exp, err := time.Parse(time.RFC3339, t.Expires); err == nil && now.After(exp) {
+				continue
+			}
+		}
+		n++
 	}
-	got := strings.TrimPrefix(auth, "Bearer ")
-	return subtle.ConstantTimeCompare([]byte(got), []byte(tok)) == 1
+	return n
 }
 
 func clientIP(r *http.Request) string {
@@ -891,6 +997,7 @@ func main() {
 	os.MkdirAll(secretsDir, 0755)
 	os.MkdirAll(envVarsDir, 0755)
 	migrateOldFormat()
+	migrateLegacyAIToken()
 
 	mux := http.NewServeMux()
 
@@ -1224,36 +1331,86 @@ func main() {
 		json.NewEncoder(w).Encode(bf)
 	})
 
-	/* AI access: manage the read token (UI only, browser origin-checked) */
+	/* AI access: manage read tokens (UI only, browser origin-checked) */
 	mux.HandleFunc("/api/ai/status", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
 			return
 		}
-		_, has := loadAIToken()
+		tokensMu.Lock()
+		tokens := loadAITokens()
+		tokensMu.Unlock()
 		sendJSON(w, 200, map[string]interface{}{
-			"enabled":  has,
-			"hasToken": has,
+			"enabled": aiActiveCount(tokens) > 0,
+			"active":  aiActiveCount(tokens),
+			"tokens":  publicAITokens(tokens),
 		})
 	})
 
 	mux.HandleFunc("/api/ai/token", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
+			var req struct {
+				Days int `json:"days"`
+			}
+			json.NewDecoder(r.Body).Decode(&req)
+			if req.Days < 0 || req.Days > 365 {
+				req.Days = 7
+			}
 			tok, err := generateAIToken()
 			if err != nil {
 				sendJSON(w, 500, map[string]string{"error": "could not generate token"})
 				return
 			}
-			if err := atomicWriteFile(aiTokenFile(), []byte(tok)); err != nil {
+			now := time.Now()
+			entry := AIToken{
+				ID:      tok[:8],
+				Token:   tok,
+				Created: now.Format(time.RFC3339),
+			}
+			if req.Days > 0 {
+				entry.Expires = now.AddDate(0, 0, req.Days).Format(time.RFC3339)
+			}
+			tokensMu.Lock()
+			tokens := append(loadAITokens(), entry)
+			err = saveAITokens(tokens)
+			tokensMu.Unlock()
+			if err != nil {
 				sendJSON(w, 500, map[string]string{"error": "could not save token"})
 				return
 			}
-			log.Printf("ai-access: token generated/rotated")
-			sendJSON(w, 200, map[string]string{"token": tok})
+			log.Printf("ai-access: token %s generated (expires %s)", entry.ID, entry.Expires)
+			sendJSON(w, 200, map[string]interface{}{
+				"token":   tok,
+				"id":      entry.ID,
+				"created": entry.Created,
+				"expires": entry.Expires,
+			})
 		case "DELETE":
-			revokeAIToken()
-			log.Printf("ai-access: token revoked")
+			id := strings.TrimSpace(r.URL.Query().Get("id"))
+			tokensMu.Lock()
+			tokens := loadAITokens()
+			found := false
+			for i := range tokens {
+				if tokens[i].ID == id && !tokens[i].Revoked {
+					tokens[i].Revoked = true
+					found = true
+				}
+			}
+			var err error
+			if found {
+				err = saveAITokens(tokens)
+			}
+			tokensMu.Unlock()
+			if !found {
+				sendJSON(w, 404, map[string]string{"error": "token not found"})
+				return
+			}
+			if err != nil {
+				sendJSON(w, 500, map[string]string{"error": "could not save token"})
+				return
+			}
+			log.Printf("ai-access: token %s revoked", id)
 			sendJSON(w, 200, map[string]string{"ok": "true"})
 		default:
 			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
@@ -1349,7 +1506,9 @@ func main() {
 		for _, v := range envVars {
 			totalSize += int64(len(v.Value))
 		}
-		_, aiEnabled := loadAIToken()
+		tokensMu.Lock()
+		aiEnabled := aiActiveCount(loadAITokens()) > 0
+		tokensMu.Unlock()
 		sendJSON(w, 200, map[string]interface{}{
 			"secrets":         len(secrets),
 			"envVars":         len(envVars),
