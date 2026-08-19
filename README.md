@@ -209,7 +209,7 @@ directly. Delete a folder to delete an entry. Nothing is hidden from you.
 
 ---
 
-## FOR GROWN-UPS
+
 
 ### Starting from the terminal
 
