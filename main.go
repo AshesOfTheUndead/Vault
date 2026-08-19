@@ -30,7 +30,7 @@ var vaultHTML []byte
 
 const (
 	defaultPort = 7575
-	version     = "2.3.2"
+	version     = "2.4.0"
 )
 
 var (
@@ -1006,6 +1006,43 @@ func main() {
 			"platform":  runtime.GOOS + "/" + runtime.GOARCH,
 			"port":      port,
 		})
+	})
+
+	/* one-click JSON backup of everything (secrets + env vars, values included) */
+	mux.HandleFunc("/api/backup", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+			return
+		}
+		writeMu.Lock()
+		entries := listEntries()
+		envVars := listEnvVars()
+		writeMu.Unlock()
+		type secretEntry struct {
+			Name    string `json:"name"`
+			Value   string `json:"value"`
+			Details string `json:"details,omitempty"`
+		}
+		type backupFile struct {
+			App        string        `json:"app"`
+			Version    string        `json:"version"`
+			ExportedAt int64         `json:"exportedAt"`
+			Secrets    []secretEntry `json:"secrets"`
+			EnvVars    []EnvVar      `json:"envVars"`
+		}
+		bf := backupFile{App: "vault", Version: version, ExportedAt: time.Now().UnixMilli()}
+		for _, e := range entries {
+			writeMu.Lock()
+			v, _ := readValue(e.Name)
+			d, _ := readDetails(e.Name)
+			writeMu.Unlock()
+			bf.Secrets = append(bf.Secrets, secretEntry{Name: e.Name, Value: v, Details: d})
+		}
+		bf.EnvVars = envVars
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Disposition", `attachment; filename="vault-backup.json"`)
+		w.Header().Set("Cache-Control", "no-store")
+		json.NewEncoder(w).Encode(bf)
 	})
 
 	/* stats */

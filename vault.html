@@ -150,12 +150,13 @@
   .brand h1 {
     margin: 0; font-family: var(--display);
     font-size: clamp(46px, 8vw, 86px); font-weight: 500;
-    line-height: 0.92; letter-spacing: -0.03em;
+    line-height: 0.92; letter-spacing: -0.02em;
     color: var(--ink);
-    display: flex; align-items: baseline; gap: 10px;
+    display: flex; align-items: baseline; gap: 2px;
   }
   .brand h1 .letter {
     display: inline-block;
+    letter-spacing: 0.05em;
     opacity: 0; transform: translateY(24px); filter: blur(10px);
     animation: letterIn 0.85s var(--ease-out) forwards;
     animation-delay: calc(0.18s + var(--i, 0) * 0.07s);
@@ -165,6 +166,7 @@
     color: var(--accent);
     text-shadow: 0 0 30px rgba(52, 211, 153, 0.5), 0 0 64px rgba(52, 211, 153, 0.22);
     position: relative;
+    margin-right: -4px;
     animation: letterIn 0.85s var(--ease-out) forwards, accBreathe 4.5s ease-in-out 1.2s infinite;
     animation-delay: calc(0.18s + var(--i, 0) * 0.07s), 1.2s;
   }
@@ -183,6 +185,7 @@
     font-size: 0.22em; font-family: var(--mono); font-weight: 600;
     color: var(--ink-3); letter-spacing: 0.1em;
     border: 1px solid var(--line); padding: 4px 9px; border-radius: 4px;
+    margin-left: 12px;
     align-self: center;
     background: rgba(52, 211, 153, 0.04);
     opacity: 0; animation: fadeIn 0.7s var(--ease-out) 0.8s forwards;
@@ -1035,7 +1038,7 @@
       </div>
       <div class="brand">
         <h1>
-          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.3</span>
+          <span class="acc letter" style="--i:0">V</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">u</span><span class="letter" style="--i:3">l</span><span class="letter" style="--i:4">t</span><span class="v">v2.4</span>
         </h1>
       </div>
       <p class="tag">
@@ -1088,6 +1091,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
         Import .env
       </button>
+      <button class="btn btn-ghost btn-sm" id="backupBtn" title="Download everything (secrets + env vars) as one JSON file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+        Backup
+      </button>
       <button class="btn btn-ghost btn-sm" id="helpBtn" title="Keyboard shortcuts (?)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </button>
@@ -1120,6 +1127,9 @@
             <label for="fVal">Value</label>
             <div class="input-wrap">
               <input id="fVal" type="password" placeholder="enter secret value…" autocomplete="off" spellcheck="false" required>
+              <button type="button" class="reveal" id="fGen" title="Generate strong password" aria-label="Generate strong password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9Z"/></svg>
+              </button>
               <button type="button" class="reveal" id="fReveal" title="Show / hide value" aria-label="Show or hide value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -1163,6 +1173,9 @@
             <label for="fEnvVal">Value</label>
             <div class="input-wrap">
               <input id="fEnvVal" type="password" placeholder="postgres://user:pass@host:5432/db" autocomplete="off" spellcheck="false" required>
+              <button type="button" class="reveal" id="fEnvGen" title="Generate random value" aria-label="Generate random value">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9Z"/></svg>
+              </button>
               <button type="button" class="reveal" id="fEnvReveal" title="Show / hide value" aria-label="Show or hide value">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -1288,10 +1301,11 @@
   const list = $('#list'), envList = $('#envList'), q = $('#q'), statN = $('#statN'), statL = $('#statL');
   const footCount = $('#footCount');
   const editor = $('#editor'), editPathLabel = $('#editPathLabel'), editWho = $('#editWho');
-  const fName = $('#fName'), fVal = $('#fVal'), fDet = $('#fDet'), fReveal = $('#fReveal');
+  const fName = $('#fName'), fVal = $('#fVal'), fDet = $('#fDet'), fReveal = $('#fReveal'), fGen = $('#fGen');
   const delBtn = $('#delBtn'), saveBtn = $('#saveBtn');
   const envEditor = $('#envEditor'), envEditPathLabel = $('#envEditPathLabel'), envEditWho = $('#envEditWho');
-  const fKey = $('#fKey'), fEnvVal = $('#fEnvVal'), fSecret = $('#fSecret'), fEnvReveal = $('#fEnvReveal');
+  const fKey = $('#fKey'), fEnvVal = $('#fEnvVal'), fSecret = $('#fSecret'), fEnvReveal = $('#fEnvReveal'), fEnvGen = $('#fEnvGen');
+  const backupBtn = $('#backupBtn');
   const envDelBtn = $('#envDelBtn'), envSaveBtn = $('#envSaveBtn');
   const confirmModal = $('#confirmModal'), confirmName = $('#confirmName');
   const confirmCancel = $('#confirmCancel'), confirmDelete = $('#confirmDelete');
@@ -1524,7 +1538,10 @@
   function render(quiet) {
     const term = filter.toLowerCase();
     if (currentTab === 'secrets') {
-      const rows = data.filter(d => d.name.toLowerCase().includes(term));
+      const rows = data.filter(d => {
+      const termL = term;
+      return d.name.toLowerCase().includes(termL) || (d.details || '').toLowerCase().includes(termL);
+    });
       setStat(rows.length, rows.length === 1 ? 'secret' : 'secrets');
       footCount.textContent = data.length + ' secret' + (data.length === 1 ? '' : 's') + ' · ' + fmtBytes(data.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
@@ -1553,7 +1570,10 @@
           </li>`).join('');
       }
     } else {
-      const rows = envData.filter(d => d.key.toLowerCase().includes(term));
+      const rows = envData.filter(d => {
+      const termL = term;
+      return d.key.toLowerCase().includes(termL) || (d.value || '').toLowerCase().includes(termL);
+    });
       setStat(rows.length, rows.length === 1 ? 'env var' : 'env vars');
       footCount.textContent = envData.length + ' env var' + (envData.length === 1 ? '' : 's') + ' · ' + fmtBytes(envData.reduce((a, d) => a + (d.value ? d.value.length : 0), 0));
       if (!rows.length) {
@@ -1817,6 +1837,27 @@
     fEnvReveal.dataset.on = on ? '' : '1';
   });
 
+  function genPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*()-_=+';
+    const buf = new Uint32Array(20);
+    crypto.getRandomValues(buf);
+    let pw = '';
+    for (let i = 0; i < 20; i++) pw += chars[buf[i] % chars.length];
+    return pw;
+  }
+  fGen.addEventListener('click', () => {
+    fVal.value = genPassword();
+    fVal.type = 'text';
+    fReveal.dataset.on = '1';
+    notify('Generated a 20-character password - copy it somewhere safe');
+  });
+  fEnvGen.addEventListener('click', () => {
+    fEnvVal.value = genPassword();
+    fEnvVal.type = 'text';
+    fEnvReveal.dataset.on = '1';
+    notify('Generated a 20-character random value');
+  });
+
   fKey.addEventListener('input', () => {
     const pos = fKey.selectionStart;
     fKey.value = fKey.value.toUpperCase();
@@ -1826,6 +1867,10 @@
   // export .env
   exportEnvBtn.addEventListener('click', () => {
     window.location.href = API + '/api/env/export';
+  });
+  // one-click JSON backup of everything
+  backupBtn.addEventListener('click', () => {
+    window.location.href = API + '/api/backup';
   });
   // import .env
   importEnvBtn.addEventListener('click', () => envFileInput.click());
@@ -2036,11 +2081,19 @@
       closeCmdPalette();
     }
   }
+  function copyCmdSelected() {
+    const it = cmdItems[cmdSelected];
+    if (!it) return;
+    if (it.type === 'secret') copyVal(it.label, false, null);
+    else if (it.type === 'env') copyVal(it.label, true, null);
+    else { execCmdSelected(); return; }
+    closeCmdPalette();
+  }
   cmdInput.addEventListener('input', () => renderCmdResults(cmdInput.value.trim()));
   cmdInput.addEventListener('keydown', (ev) => {
     if (ev.key === 'ArrowDown') { ev.preventDefault(); cmdSelected = Math.min(cmdSelected + 1, cmdItems.length - 1); updateCmdSelected(); }
     else if (ev.key === 'ArrowUp') { ev.preventDefault(); cmdSelected = Math.max(cmdSelected - 1, 0); updateCmdSelected(); }
-    else if (ev.key === 'Enter') { ev.preventDefault(); execCmdSelected(); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); ev.shiftKey ? copyCmdSelected() : execCmdSelected(); }
     else if (ev.key === 'Escape') { ev.preventDefault(); closeCmdPalette(); }
   });
   cmdBackdrop.addEventListener('click', (ev) => {

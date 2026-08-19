@@ -33,6 +33,10 @@
 - **Auto-mark sensitive** - keys like `PASSWORD`, `TOKEN`, `API_KEY` are auto-marked secret on import
 - **Atomic file writes** - write to temp file then rename, prevents corruption
 - **Diff-based auto-sync** - multi-tab sync via polling that only re-renders when something actually changed
+- **One-click JSON backup** - downloads everything (secrets + env vars, values included) as a single file
+- **Password generator** - one click fills a strong 20-character random password in any editor
+- **Smarter search** - the filter matches details (secrets) and values (env vars), not just names
+- **Command palette copy** - Shift+Enter in the palette copies the selected item's value straight to your clipboard
 - **Graceful shutdown** - Ctrl+C cleanly shuts down the HTTP server
 
 ---
@@ -123,6 +127,7 @@ curl http://192.168.1.5:7575/api/health
 | `E` | New env var (in Env Vars tab) |
 | `R` | Manual refresh |
 | `Ctrl+K` / `Cmd+K` | Open command palette |
+| `Shift+Enter` | In palette: copy the selected item's value |
 | `Ctrl+Enter` | Save current editor |
 | `Esc` | Close editor / modal / palette |
 
@@ -159,6 +164,7 @@ All endpoints are JSON over HTTP on `127.0.0.1:7575`.
 | `GET`  | `/api/health` | Health check (uptime, version) |
 | `GET`  | `/api/stats` | Stats (counts, total size, uptime) |
 | `GET`  | `/api/version` | Version (go version, platform, port) |
+| `GET`  | `/api/backup` | Download everything as one JSON file (attachment) |
 
 ### Examples
 
