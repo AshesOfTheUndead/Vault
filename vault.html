@@ -2762,7 +2762,6 @@
       aiTokenRevokeSel.disabled = false;
       if (sel) {
         aiSelectedLabel.textContent = sel.id + '••••';
-        aiTokenRevokeSel.disabled = sel.revoked || (sel.expires && new Date(sel.expires).getTime() < Date.now());
       }
     }
   }
@@ -2839,7 +2838,7 @@
     aiTokenActions.hidden = !sel;
     if (sel) {
       aiSelectedLabel.textContent = sel.id + '••••';
-      aiTokenRevokeSel.disabled = sel.revoked || (sel.expires && new Date(sel.expires).getTime() < Date.now());
+      aiTokenRevokeSel.disabled = false;
     }
   });
   aiTokenCopySel.addEventListener('click', async () => {

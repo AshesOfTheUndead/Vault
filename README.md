@@ -304,8 +304,9 @@ AI Access (bearer token required, no Origin check - works from curl / AI tools):
 | `GET`    | `/api/ai/status` | List tokens (created / expiry / revoked) |
 | `POST`   | `/api/ai/token` | Generate a token `{"days": 1, 7, 30, or 0 = never}` (default 7) |
 | `DELETE` | `/api/ai/token?id=X` | Delete a token for good |
-| `GET`    | `/api/ai/list` | List all entry names |
-| `GET`    | `/api/ai/read?name=X` | Read a value |
+| `GET`    | `/api/ai/list` | List all entry names (secrets, env vars, gateways) |
+| `GET`    | `/api/ai/read?name=X` | Read a value (secret, env var, or gateway) |
+| `POST`   | `/api/ai/write` | Create or update `{kind:"secret"|"env"|"gateway", name, value, ...}` |
 
 Tunnel:
 

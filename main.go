@@ -1778,17 +1778,21 @@ func main() {
                 writeMu.Lock()
                 secrets := listEntries()
                 envVars := listEnvVars()
+                gateways := listGateways()
                 writeMu.Unlock()
                 type aiEntry struct {
                         Name string `json:"name"`
                         Kind string `json:"kind"`
                 }
-                entries := make([]aiEntry, 0, len(secrets)+len(envVars))
+                entries := make([]aiEntry, 0, len(secrets)+len(envVars)+len(gateways))
                 for _, s := range secrets {
                         entries = append(entries, aiEntry{Name: s.Name, Kind: "secret"})
                 }
                 for _, e := range envVars {
                         entries = append(entries, aiEntry{Name: e.Key, Kind: "env"})
+                }
+                for _, g := range gateways {
+                        entries = append(entries, aiEntry{Name: g.Name, Kind: "gateway"})
                 }
                 sendJSON(w, 200, map[string]interface{}{"entries": entries})
         })
@@ -1829,8 +1833,102 @@ func main() {
                         sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "env", "value": ev})
                         return
                 }
+                gw, ok3 := readGateway(name)
+                if ok3 {
+                        writeMu.Unlock()
+                        auditLog("ai.read.gateway", name, clientIP(r))
+                        log.Printf("ai-access: read gateway %q from %s", name, clientIP(r))
+                        sendJSON(w, 200, map[string]interface{}{"name": name, "kind": "gateway", "type": gw.Type, "description": gw.Description, "vars": gw.Vars})
+                        return
+                }
                 writeMu.Unlock()
                 sendJSON(w, 404, map[string]string{"error": "not found"})
+        })
+
+        /* tunnel: one-click HTTPS access for cloud AIs (UI only, browser origin-checked) */
+        mux.HandleFunc("/api/ai/write", func(w http.ResponseWriter, r *http.Request) {
+                if r.Method != "POST" {
+                        sendJSON(w, 405, map[string]string{"error": "method not allowed"})
+                        return
+                }
+                if !aiBearerOK(r) {
+                        sendJSON(w, 401, map[string]string{"error": "unauthorized"})
+                        return
+                }
+                if !aiLimiter.allow(clientIP(r), 60, time.Minute) {
+                        sendJSON(w, 429, map[string]string{"error": "rate limited"})
+                        return
+                }
+                var req struct {
+                        Kind    string       `json:"kind"`
+                        Name    string       `json:"name"`
+                        Value   string       `json:"value,omitempty"`
+                        Details string       `json:"details,omitempty"`
+                        Key     string       `json:"key,omitempty"`
+                        Secret  bool         `json:"secret,omitempty"`
+                        Type    string       `json:"type,omitempty"`
+                        Desc    string       `json:"description,omitempty"`
+                        Vars    []GatewayVar `json:"vars,omitempty"`
+                }
+                json.NewDecoder(r.Body).Decode(&req)
+                switch req.Kind {
+                case "secret":
+                        name := strings.TrimSpace(req.Name)
+                        if name == "" {
+                                sendJSON(w, 400, map[string]string{"error": "name is required"})
+                                return
+                        }
+                        writeMu.Lock()
+                        _, err := writeValue(name, req.Value)
+                        if err == nil && req.Details != "" {
+                                writeDetails(name, req.Details)
+                        }
+                        writeMu.Unlock()
+                        if err != nil {
+                                sendJSON(w, 500, map[string]string{"error": err.Error()})
+                                return
+                        }
+                        auditLog("ai.write.secret", name, clientIP(r))
+                        log.Printf("ai-access: wrote secret %q from %s", name, clientIP(r))
+                        sendJSON(w, 200, map[string]interface{}{"ok": true, "kind": "secret", "name": name})
+                case "env":
+                        key := strings.TrimSpace(req.Key)
+                        if key == "" {
+                                sendJSON(w, 400, map[string]string{"error": "key is required"})
+                                return
+                        }
+                        writeMu.Lock()
+                        _, err := writeEnvVar(key, req.Value, req.Secret)
+                        writeMu.Unlock()
+                        if err != nil {
+                                sendJSON(w, 500, map[string]string{"error": err.Error()})
+                                return
+                        }
+                        auditLog("ai.write.env", key, clientIP(r))
+                        log.Printf("ai-access: wrote env var %q from %s", key, clientIP(r))
+                        sendJSON(w, 200, map[string]interface{}{"ok": true, "kind": "env", "key": key})
+                case "gateway":
+                        name := strings.TrimSpace(req.Name)
+                        if name == "" {
+                                sendJSON(w, 400, map[string]string{"error": "name is required"})
+                                return
+                        }
+                        if req.Vars == nil {
+                                req.Vars = []GatewayVar{}
+                        }
+                        writeMu.Lock()
+                        _, err := writeGateway(name, req.Type, req.Desc, req.Vars)
+                        writeMu.Unlock()
+                        if err != nil {
+                                sendJSON(w, 500, map[string]string{"error": err.Error()})
+                                return
+                        }
+                        auditLog("ai.write.gateway", name, clientIP(r))
+                        log.Printf("ai-access: wrote gateway %q from %s", name, clientIP(r))
+                        sendJSON(w, 200, map[string]interface{}{"ok": true, "kind": "gateway", "name": name})
+                default:
+                        sendJSON(w, 400, map[string]string{"error": "kind must be secret, env, or gateway"})
+                }
         })
 
         /* tunnel: one-click HTTPS access for cloud AIs (UI only, browser origin-checked) */
