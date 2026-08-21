@@ -1229,6 +1229,16 @@
     .bg-scanlines, .bg-sweep, #matrix-canvas { display: none; }
     body::before { display: none; }
   }
+  @media (hover: none) and (pointer: coarse) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .bg-scanlines, .bg-sweep, #matrix-canvas { display: none; }
+    body::before { display: none; }
+    .modal, .panel { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 6px 24px rgba(0,0,0,0.45); }
+  }
 
   .ai-modal { width: min(600px, calc(100vw - 32px)); }
   .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
@@ -1803,6 +1813,7 @@
   'use strict';
   const API = '';
   const $ = (s) => document.querySelector(s);
+  const isMobile = matchMedia('(hover: none) and (pointer: coarse)').matches;
   const list = $('#list'), envList = $('#envList'), q = $('#q'), statN = $('#statN'), statL = $('#statL');
   const footCount = $('#footCount');
   const editor = $('#editor'), editPathLabel = $('#editPathLabel'), editWho = $('#editWho');
@@ -3286,7 +3297,7 @@
   renderRecent(); // load recently-accessed chips from localStorage
 
   let raf = null;
-  document.addEventListener('mousemove', (e) => {
+  if (!isMobile) document.addEventListener('mousemove', (e) => {
     if (raf) return;
     raf = requestAnimationFrame(() => {
       document.documentElement.style.setProperty('--mx', e.clientX + 'px');
@@ -3296,6 +3307,7 @@
   });
 
   (function matrix() {
+    if (isMobile) return;
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
     const cv = document.getElementById('matrix-canvas');
