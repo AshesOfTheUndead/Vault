@@ -415,6 +415,8 @@
     color: var(--ink); background: var(--surface-2); border-color: var(--line-bright);
     transform: translateY(-1px);
   }
+  .btn-danger-text { color: var(--danger) !important; }
+  .btn-danger-text:hover { background: rgba(251, 113, 133, 0.12) !important; border-color: rgba(251, 113, 133, 0.45) !important; color: var(--danger) !important; }
   .btn-danger {
     background: linear-gradient(180deg, rgba(251, 113, 133, 0.22), rgba(251, 113, 133, 0.07));
     color: var(--danger); border-color: rgba(251, 113, 133, 0.45);
@@ -1332,8 +1334,8 @@
   .ai-token-item.ai-item-revoked { opacity: 0.55; }
   .ai-token-actions {
     display: flex; align-items: center; gap: 8px;
-    margin-top: 10px; padding-top: 10px;
-    border-top: 1px dashed var(--line);
+    padding-top: 10px; border-top: 1px dashed var(--line);
+    position: sticky; bottom: 0; background: var(--surface-2); z-index: 1;
   }
   .ai-selected-label { font-family: var(--mono); font-size: 10.5px; color: var(--accent-hi); }
   .ai-token-actions .spacer { flex: 1; }
@@ -1345,7 +1347,8 @@
     display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
   }
   .ai-count { color: var(--ink-mute); font-weight: 400; letter-spacing: 0; }
-  .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
+  .ai-token-scroll { max-height: 320px; overflow-y: auto; padding-right: 4px; }
+  .ai-token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .ai-token-id { font-family: var(--mono); font-size: 12px; color: var(--ink); letter-spacing: 0.06em; }
   .ai-token-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .ai-token-created { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); }
@@ -1735,6 +1738,7 @@
       <div class="ai-tunnel-body" id="tunnelBody" hidden>
         <code class="ai-token" id="tunnelUrl"></code>
         <button type="button" class="btn btn-ghost btn-sm" id="tunnelCopyUrl">Copy URL</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="tunnelNew">New tunnel</button>
         <button type="button" class="btn btn-ghost btn-sm" id="tunnelStop">Stop</button>
       </div>
       <div class="ai-tunnel-start" id="tunnelStartWrap" hidden>
@@ -1766,12 +1770,14 @@
     </div>
     <div class="ai-section" id="aiTokenListWrap" hidden>
       <div class="ai-section-title">Tokens <span class="ai-count" id="aiTokenCount"></span></div>
-      <ul class="ai-token-list" id="aiTokenList"></ul>
-      <div class="ai-token-actions" id="aiTokenActions" hidden>
-        <span class="ai-selected-label" id="aiSelectedLabel"></span>
-        <span class="spacer"></span>
-        <button type="button" class="btn btn-ghost btn-sm" id="aiTokenCopySel">Copy</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="aiTokenRevokeSel">Delete</button>
+      <div class="ai-token-scroll">
+        <ul class="ai-token-list" id="aiTokenList"></ul>
+        <div class="ai-token-actions" id="aiTokenActions" hidden>
+          <span class="ai-selected-label" id="aiSelectedLabel"></span>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-ghost btn-sm" id="aiTokenCopySel">Copy</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-danger-text" id="aiTokenRevokeSel">Delete</button>
+        </div>
       </div>
     </div>
     <div class="ai-examples">
@@ -2706,7 +2712,7 @@
   const aiTokenActions = $('#aiTokenActions'), aiSelectedLabel = $('#aiSelectedLabel');
   const aiTokenCopySel = $('#aiTokenCopySel'), aiTokenRevokeSel = $('#aiTokenRevokeSel');
   const tunnelTag = $('#tunnelTag'), tunnelBody = $('#tunnelBody'), tunnelUrl = $('#tunnelUrl');
-  const tunnelCopyUrl = $('#tunnelCopyUrl'), tunnelStop = $('#tunnelStop');
+  const tunnelCopyUrl = $('#tunnelCopyUrl'), tunnelStop = $('#tunnelStop'), tunnelNew = $('#tunnelNew');
   const tunnelStartWrap = $('#tunnelStartWrap'), tunnelStart = $('#tunnelStart');
   let aiTokenCache = '', aiFreshId = '', aiSelected = '', aiTokens = [];
   function fmtAIDate(iso) {
@@ -2891,6 +2897,21 @@
       refreshTunnel();
     } catch (e) {
       notify('Stop failed: ' + esc(e.message), 'err');
+    }
+  });
+  tunnelNew.addEventListener('click', async () => {
+    try {
+      tunnelNew.classList.add('btn-busy');
+      await api('/api/tunnel/stop', { method: 'POST' });
+      await refreshTunnel();
+      await new Promise(r => setTimeout(r, 400));
+      await api('/api/tunnel/start', { method: 'POST' });
+      await refreshTunnel();
+      notify('New tunnel URL generated');
+    } catch (e) {
+      notify('New tunnel failed: ' + esc(e.message), 'err');
+    } finally {
+      tunnelNew.classList.remove('btn-busy');
     }
   });
   tunnelCopyUrl.addEventListener('click', async () => {
